@@ -8,7 +8,7 @@ def index():
     return '<h1>网站备案中</h1>'
 
 
-@app.route('/demo', methods=['GET'])
+@app.route('/home', methods=['GET'])
 def home():
 	t = {}
 	t['rank'] = '9'
