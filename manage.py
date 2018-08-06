@@ -9,9 +9,9 @@ def index():
 
 
 @app.route('/demo', methods=['GET'])
-def index():
+def home():
 	t = {}
-	t['rank'] = '99'
+	t['rank'] = '9'
 	return json.dumps(t, ensure_ascii=False)
 
 
