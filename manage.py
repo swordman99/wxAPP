@@ -4,7 +4,7 @@ import pymysql
 import os
 import json
 
-db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+db = pymysql.connect('localhost', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 cursor = db.cursor()
 
 app = Flask(__name__)
