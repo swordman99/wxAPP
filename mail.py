@@ -14,15 +14,15 @@ def send_and_insert(i, msg):
 		ID = str(random.randint(1000,9999)) + '0' + str(randid[i][0])
 	else:
 		ID = str(random.randint(1000,9999)) + str(randid[i][0])
-	message = MIMEText(name[i][0]+'同学:\n'+'您好！\n欢迎参加地学知识竞赛！\n' +
-					   '您此次比赛的ID是：' + ID + '\n' +
+	message = MIMEText('亲爱的' + name[i][0]+'同学:\n'+'    您好！\n    欢迎参加地学知识竞赛！\n' +
+					   '    您此次比赛的ID是：' + ID + '\n' +
 					   msg, 'plain', 'utf-8')
 	message['From'] = os.environ.get('MAIL_USERNAME')
 	message['To'] = s[i][0]+'pku.edu.cn'
 	message['Subject'] = Header('地学知识竞赛通知', 'utf-8')
 	try:
 		cursor.execute('UPDATE students\
-		SET password = "%s"\
+		SET finalid = "%s"\
 		WHERE id = " %s"'\
 		 % (ID, randid[i][0]))
 		db.commit()
@@ -39,7 +39,7 @@ def send_and_insert(i, msg):
 
 db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 cursor = db.cursor()
-cursor.execute('SELECT studentid FROM students')
+cursor.execute('SELECT stuid FROM students')
 s = cursor.fetchall()
 cursor.execute('SELECT id FROM students')
 randid = cursor.fetchall()
@@ -56,7 +56,7 @@ smtpObj.login(mail_user, mail_pass)
 sender = os.environ.get('MAIL_USERNAME')
 
 # 邮件正文
-msg = '希望您能记住这个ID，若是您进入决赛，我们将会要求您出示这个ID来验证您的身份。'
+msg = '    希望您能记住这个ID，若是您进入决赛，我们将会要求您出示这个ID来验证您的身份。'
 for i in range(len(s)):
 	send_and_insert(i, msg)
 db.close()
