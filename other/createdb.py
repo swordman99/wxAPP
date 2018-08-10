@@ -14,7 +14,7 @@ sql1 = '''CREATE TABLE students(
           did text,
           lastdid int,
           conti int DEFAULT 0,
-          mark int,
+          mark int DEFAULT 0,
           level int,
           finalid char(8)
           )
@@ -29,7 +29,7 @@ sql2 = '''CREATE TABLE others(
           did text,
           lastdid int,
           conti int DEFAULT 0,
-          mark int,
+          mark int DEFAULT 0,
           level int)
           DEFAULT CHARSET=UTF8MB4'''
 cursor.execute('DROP TABLE IF EXISTS questions')
