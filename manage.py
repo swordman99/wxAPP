@@ -26,7 +26,7 @@ def openid():
 	url = 'https://api.weixin.qq.com/sns/jscode2session?' + \
 	'appid=wxb1240864091b21d6&' + \
 	'secret=da85186c1ca4474c7f95ea15bb21b4b7&' + \
-	'js_code=' + data['code']  + \
+	'js_code=' + data['code'] + \
 	'&grant_type=authorization_code'
 	r = requests.get(url)
 	return json.dumps(r.text[-30:-3], ensure_ascii=False)
@@ -69,15 +69,14 @@ def login():
 	data = request.json
 	wxinfo = data['userInfo']
 	info = data['value']
-	print(data)
 	if data['type'] == 0:
 		sql1 = "SELECT COUNT(*) as flag FROM students \
-				WHERE openid = '%s'" % (str(data['openid']))
+				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql1)
 		flag = cursor.fetchall()
 	else:
 		sql1 = "SELECT COUNT(*) as flag FROM others \
-				WHERE openid = '%s'" % (str(data['openid']))
+				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql1)
 		flag = cursor.fetchall()
 	if flag[0][0] == 0:
@@ -85,16 +84,16 @@ def login():
 			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid)\
 					values('%s', '%s', '%s', '%s', '%s', '%s')"\
 					% (info['name'], info['number'], info['phone'],\
-					wxinfo['nickName'], wxinfo['avatarUrl'], str(data['openid']))
+					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
 			sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid)\
 					values('%s', '%s', '%s', '%s')"\
 					% (info['phone'],\
-					wxinfo['nickName'], wxinfo['avatarUrl'], str(data['openid']))
+					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 	else:
 		if data['type'] == 0:
 			sqlbu = "SELECT name, stuid, phone FROM students\
-					 WHERE openid = '%s'" % (str(data['openid']))
+					 WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
 			if match[0][0] == info['name']\
@@ -104,13 +103,14 @@ def login():
 			else:
 				redata['isMatch'] = False
 			sql2 = "UPDATE students\
-					SET nickName = '%s'\
-					SET avatarUrl = '%s'"\
-					% (wxinfo['nickName'], wxinfo['avatarUrl'])
+					SET nickName = '%s',\
+					avatarUrl = '%s'\
+					WHERE openid = '%s'"\
+					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
 			#标记1
 			sqlbu = "SELECT phone FROM others \
-			WHERE openid = '%s'" % (str(data['openid']))
+			WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
 			if match[0][0] == info['phone']:
@@ -118,20 +118,22 @@ def login():
 			else:
 				redata['isMatch'] = False
 			sql2 = "UPDATE others\
-					SET nickName = '%s'\
-					SET avatarUrl = '%s'"\
-					% (wxinfo['nickName'], wxinfo['avatarUrl'])
+					SET nickName = '%s',\
+					avatarUrl = '%s'\
+					WHERE openid = '%s'"\
+					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    import mail
+	    if flag[0][0] == 0 and data['type'] == 0:
+	    	import mail
 	except:
 		db.rollback()
 		print('插入或更新错误')
 	if flag[0][0] != 0:
 		if data['type'] == 0:
-			sql3 = "SELECT mark in students\
-					WHERE openid = '%s'" % (str(data['openid']))
+			sql3 = "SELECT mark FROM students\
+					WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sql3)
 			mark = cursor.fetchall()
 			sql4 = "SELECT COUNT(*) as srank FROM students\
@@ -146,8 +148,7 @@ def login():
 			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 		else:
 			#标记2
-			sql3 = "SELECT mark in others \
-			WHERE openid = '%s'" % (str(data['openid']))
+			sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sql3)
 			mark = cursor.fetchall()
 			sql4 = "SELECT COUNT(*) as srank FROM students\
@@ -172,9 +173,9 @@ def questionget():
 	N = cursor.fetchall()
 	flag = 0
 	try:
-		cursor.execute("SELECT did FROM students WHERE openid = '%s'" % (str(data['openid'])))
+		cursor.execute("SELECT did FROM students WHERE openid = '%s'" % (data['openID']))
 	except:
-		cursor.execute("SELECT did FROM others WHERE openid = '%s'" % (str(data['openid'])))
+		cursor.execute("SELECT did FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	did = cursor.fetchall()
 	if did == ():
@@ -195,17 +196,17 @@ def questionget():
 	if flag == 0:
 		sql1 = "UPDATE students\
 			   SET did = '%s'\
-			   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), str(data['openid']))
+			   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
 		sql2 = "UPDATE students\
 				SET lastdid = '%d'\
-				WHERE openid = '%s'" % (question_id, str(data['openid']))
+				WHERE openid = '%s'" % (question_id, data['openID'])
 	else:
 		sql1 = "UPDATE others\
 			   SET did = '%s'\
-			   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), str(data['openid']))
+			   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
 		sql2 = "UPDATE others\
 				SET lastdid = '%d'\
-				WHERE openid = '%s'" % (question_id, str(data['openid']))
+				WHERE openid = '%s'" % (question_id, data['openID'])
 	try:
 		cursor.execute(sql1)
 		cursor.execute(sql2)
@@ -223,9 +224,9 @@ def questionjudge():
 	redata = {}
 	redata['judge'] = False
 	try:
-		cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (str(data['openid'])))
+		cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID']))
 	except:
-		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (str(data['openid'])))
+		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	temp = cursor.fetchall()
 	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
@@ -246,7 +247,7 @@ def questionjudge():
 			sql = "UPDATE students\
 				   SET mark = '%d'\
 				   SET conti = '%d'\
-				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, str(data['openid']))
+				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
@@ -257,7 +258,7 @@ def questionjudge():
 			sql = "UPDATE others\
 				   SET mark = '%d'\
 				   SET conti = '%d'\
-				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, str(data['openid']))
+				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
@@ -269,7 +270,7 @@ def questionjudge():
 		if flag == 0:
 			sql = "UPDATE students\
 				   SET conti = '%d'\
-				   WHERE openid = '%s'" % (0, str(data['openid']))
+				   WHERE openid = '%s'" % (0, data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
@@ -279,7 +280,7 @@ def questionjudge():
 		else:
 			sql = "UPDATE others\
 				   SET conti = '%d'\
-				   WHERE openid = '%s'" % (0, str(data['openid']))
+				   WHERE openid = '%s'" % (0, data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
