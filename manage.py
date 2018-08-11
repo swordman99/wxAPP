@@ -108,7 +108,6 @@ def login():
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
-			#标记1
 			sqlbu = "SELECT phone FROM others \
 			WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
@@ -147,7 +146,6 @@ def login():
 			orank = cursor.fetchall()
 			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 		else:
-			#标记2
 			sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sql3)
 			mark = cursor.fetchall()
@@ -245,8 +243,8 @@ def questionjudge():
 			add = 16
 		if flag == 0:
 			sql = "UPDATE students\
-				   SET mark = '%d'\
-				   SET conti = '%d'\
+				   SET mark = '%d',\
+				   conti = '%d'\
 				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, data['openID'])
 			try:
 				cursor.execute(sql)
@@ -256,8 +254,8 @@ def questionjudge():
 				print("更新分数错误")
 		else:
 			sql = "UPDATE others\
-				   SET mark = '%d'\
-				   SET conti = '%d'\
+				   SET mark = '%d',\
+				   conti = '%d'\
 				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, data['openID'])
 			try:
 				cursor.execute(sql)
