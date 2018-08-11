@@ -81,13 +81,13 @@ def login():
 		flag = cursor.fetchall()
 	if flag[0][0] == 0:
 		if data['type'] == 0:
-			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid)\
-					values('%s', '%s', '%s', '%s', '%s', '%s')"\
+			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
+					values('%s', '%s', '%s', '%s', '%s', '%s', '')"\
 					% (info['name'], info['number'], info['phone'],\
 					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
-			sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid)\
-					values('%s', '%s', '%s', '%s')"\
+			sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
+					values('%s', '%s', '%s', '%s', '')"\
 					% (info['phone'],\
 					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 	else:
@@ -104,7 +104,7 @@ def login():
 				redata['isMatch'] = False
 			sql2 = "UPDATE students\
 					SET nickName = '%s',\
-					avatarUrl = '%s'\
+					avatarUrl = '%s',\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
@@ -167,6 +167,8 @@ def login():
 def questionget():
 	data = request.json
 	redata = {}
+	redata['title'] = ''
+	redata['op'] = []
 	cursor.execute("SELECT COUNT(*) FROM questions")
 	N = cursor.fetchall()
 	flag = 0
@@ -182,15 +184,13 @@ def questionget():
 		while 1:
 			question_id = random.randrange(1, N[0][0]+1)
 			if str(question_id) not in did[0][0]:
-				print(did)
+				break
 	cursor.execute("SELECT title, opa, opb, opc, opd FROM questions\
 			WHERE id = '%d'" % (question_id))
 	question = cursor.fetchall()
 	redata['title'] = question[0][0]
-	redata['opa'] = question[0][1]
-	redata['opb'] = question[0][2]
-	redata['opc'] = question[0][3]
-	redata['opd'] = question[0][4]
+	for i in range(1, 5):
+		redata['op'].append(question[0][i])
 	if flag == 0:
 		sql1 = "UPDATE students\
 			   SET did = '%s'\
@@ -212,6 +212,9 @@ def questionget():
 	except:
 		cursor.rollback()
 		print("更新did错误")
+	print(N)
+	print(did)
+	print(redata)
 	return json.dumps(redata, ensure_ascii=False)
 
 
@@ -221,6 +224,8 @@ def questionjudge():
 	flag = 0
 	redata = {}
 	redata['judge'] = False
+	redata['opr'] = ''
+	redata['number'] = 0
 	try:
 		cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID']))
 	except:
@@ -229,6 +234,7 @@ def questionjudge():
 	temp = cursor.fetchall()
 	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
 	opr = cursor.fetchall()
+	data['opr'] = opr[0][0]
 	if data['op'] == opr[0][0]:
 		redata['judge'] = True
 		if temp[0][3] == 0:
@@ -285,6 +291,13 @@ def questionjudge():
 			except:
 				cursor.rollback()
 				print("更新conti错误")
+	if flag == 0:
+		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
+	else:
+		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
+	redata['number'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
