@@ -69,17 +69,16 @@ def login():
 	data = request.json
 	wxinfo = data['userInfo']
 	info = data['value']
-	if data['type'] == 0:
-		sql1 = "SELECT COUNT(*) as flag FROM students \
-				WHERE openid = '%s'" % (data['openID'])
-		cursor.execute(sql1)
-		flag = cursor.fetchall()
-	else:
-		sql1 = "SELECT COUNT(*) as flag FROM others \
-				WHERE openid = '%s'" % (data['openID'])
-		cursor.execute(sql1)
-		flag = cursor.fetchall()
-	if flag[0][0] == 0:
+	sql1s = "SELECT COUNT(*) as flag FROM students \
+			WHERE openid = '%s'" % (data['openID'])
+	cursor.execute(sql1s)
+	flags = cursor.fetchall()
+	sql1o = "SELECT COUNT(*) as flag FROM others \
+			WHERE openid = '%s'" % (data['openID'])
+	cursor.execute(sql1o)
+	flago = cursor.fetchall()
+	flag = flags[0][0] + flago[0][0]
+	if flag == 0:
 		if data['type'] == 0:
 			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
 					values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
@@ -96,15 +95,20 @@ def login():
 					 WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
-			if match[0][0] == info['name']\
-			and match[0][1] == info['number']\
-			and match[0][2] == info['phone']:
-				redata['isMatch'] = True
-			else:
+			try:
+				if match[0][0] == info['name']\
+				and match[0][1] == info['number']\
+				and match[0][2] == info['phone']:
+					redata['isMatch'] = True
+				else:
+					redata['isMatch'] = False
+					return json.dumps(redata, ensure_ascii=False)
+			except:
 				redata['isMatch'] = False
+				return json.dumps(redata, ensure_ascii=False)
 			sql2 = "UPDATE students\
 					SET nickName = '%s',\
-					avatarUrl = '%s',\
+					avatarUrl = '%s'\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
@@ -112,10 +116,15 @@ def login():
 			WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
-			if match[0][0] == info['phone']:
-				redata['isMatch'] = True
-			else:
+			try:
+				if match[0][0] == info['phone']:
+					redata['isMatch'] = True
+				else:
+					redata['isMatch'] = False
+					return json.dumps(redata, ensure_ascii=False)
+			except:
 				redata['isMatch'] = False
+				return json.dumps(redata, ensure_ascii=False)
 			sql2 = "UPDATE others\
 					SET nickName = '%s',\
 					avatarUrl = '%s'\
@@ -124,12 +133,12 @@ def login():
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    if flag[0][0] == 0 and data['type'] == 0:
+	    if flag == 0 and data['type'] == 0:
 	    	import mail
 	except:
 		db.rollback()
 		print('插入或更新错误')
-	if flag[0][0] != 0:
+	if flag != 0:
 		if data['type'] == 0:
 			sql3 = "SELECT mark FROM students\
 					WHERE openid = '%s'" % (data['openID'])
@@ -213,8 +222,6 @@ def questionget():
 	except:
 		cursor.rollback()
 		print("更新did错误")
-	print(N)
-	print(redata)
 	return json.dumps(redata, ensure_ascii=False)
 
 
