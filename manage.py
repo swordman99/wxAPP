@@ -29,12 +29,60 @@ def openid():
 	'js_code=' + data['code'] + \
 	'&grant_type=authorization_code'
 	r = requests.get(url)
-	return json.dumps(r.text[-30:-3], ensure_ascii=False)
+	s1 = r.text
+	s2 = s1.split('"')
+	result = s2[7]
+	return json.dumps(result, ensure_ascii=False)
 
 
-@app.route('/home', methods=['GET'])
+@app.route('/home', methods=['POST'])
 def home():
+	data = request.json
 	redata = {}
+	redata['rank'] = [0, 0]
+	redata['loged'] = False
+	flag = 2
+	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		mark = cursor.fetchall()
+		redata['number'] = mark[0][0]
+		redata['loged'] = True
+		flag = 0
+	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+		mark = cursor.fetchall()
+		redata['number'] = mark[0][0]
+		redata['loged'] = True
+		flag = 1
+	else:
+		redata['number'] = 0
+	if flag == 0:
+		sql3 = "SELECT mark FROM students\
+				WHERE openid = '%s'" % (data['openID'])
+		cursor.execute(sql3)
+		mark = cursor.fetchall()
+		sql4 = "SELECT COUNT(*) as srank FROM students\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql4)
+		srank = cursor.fetchall()
+		redata['rank'][1] = srank[0][0] + 1
+		sql5 = "SELECT COUNT(*) as orank FROM others\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql5)
+		orank = cursor.fetchall()
+		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+	elif flag == 1:
+		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
+		cursor.execute(sql3)
+		mark = cursor.fetchall()
+		sql4 = "SELECT COUNT(*) as srank FROM students\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql4)
+		srank = cursor.fetchall()
+		redata['rank'][1] = srank[0][0] + 1
+		sql5 = "SELECT COUNT(*) as orank FROM others\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql5)
+		orank = cursor.fetchall()
+		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	redata['init'] = {}
 	redata['init']['sum'] = [0, 0]
 	redata['init']['lists'] = []
@@ -69,11 +117,33 @@ def login():
 	data = request.json
 	wxinfo = data['userInfo']
 	info = data['value']
-	sql1s = "SELECT COUNT(*) as flag FROM students \
+	redata['init'] = {}
+	redata['init']['sum'] = [0, 0]
+	redata['init']['lists'] = []
+	redata['init']['content'] = []
+	cursor.execute('SELECT COUNT(*) as numnei FROM students')
+	numnei = cursor.fetchall()
+	cursor.execute('SELECT COUNT(*) as numwai FROM others')
+	numwai = cursor.fetchall()
+	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
+	redata['init']['sum'][1] = numnei[0][0]
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
+	school = cursor.fetchall()
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
+					UNION ALL\
+					SELECT avatarUrl,nickName,mark FROM others\
+					ORDER BY mark DESC\
+					LIMIT 100')
+	world = cursor.fetchall()
+	redata['init']['lists'].append(world)
+	redata['init']['lists'].append(school)
+	cursor.execute('SELECT content FROM content')
+	redata['init']['content'] = cursor.fetchall()
+	sql1s = "SELECT COUNT(*) as flags FROM students \
 			WHERE openid = '%s'" % (data['openID'])
 	cursor.execute(sql1s)
 	flags = cursor.fetchall()
-	sql1o = "SELECT COUNT(*) as flag FROM others \
+	sql1o = "SELECT COUNT(*) as flago FROM others \
 			WHERE openid = '%s'" % (data['openID'])
 	cursor.execute(sql1o)
 	flago = cursor.fetchall()
@@ -95,15 +165,11 @@ def login():
 					 WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
-			try:
-				if match[0][0] == info['name']\
-				and match[0][1] == info['number']\
-				and match[0][2] == info['phone']:
-					redata['isMatch'] = True
-				else:
-					redata['isMatch'] = False
-					return json.dumps(redata, ensure_ascii=False)
-			except:
+			if match[0][0] == info['name']\
+			and match[0][1] == info['number']\
+			and match[0][2] == info['phone']:
+				redata['isMatch'] = True
+			else:
 				redata['isMatch'] = False
 				return json.dumps(redata, ensure_ascii=False)
 			sql2 = "UPDATE students\
@@ -116,15 +182,13 @@ def login():
 			WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
-			try:
-				if match[0][0] == info['phone']:
-					redata['isMatch'] = True
-				else:
-					redata['isMatch'] = False
-					return json.dumps(redata, ensure_ascii=False)
-			except:
+			if match[0][0] == info['phone']:
+				redata['isMatch'] = True
+			else:
 				redata['isMatch'] = False
 				return json.dumps(redata, ensure_ascii=False)
+			redata['isMatch'] = False
+			return json.dumps(redata, ensure_ascii=False)
 			sql2 = "UPDATE others\
 					SET nickName = '%s',\
 					avatarUrl = '%s'\
@@ -172,6 +236,74 @@ def login():
 	return json.dumps(redata, ensure_ascii=False)
 
 
+@app.route('/loginsuccess', methods=['POST'])
+def loginsuccess():
+	data = request.json
+	redata = {}
+	redata['rank'] = [0, 0]
+	redata['number'] = 0
+	redata['init'] = {}
+	redata['init']['sum'] = [0, 0]
+	redata['init']['lists'] = []
+	redata['init']['content'] = []
+	cursor.execute('SELECT COUNT(*) as numnei FROM students')
+	numnei = cursor.fetchall()
+	cursor.execute('SELECT COUNT(*) as numwai FROM others')
+	numwai = cursor.fetchall()
+	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
+	redata['init']['sum'][1] = numnei[0][0]
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
+	school = cursor.fetchall()
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
+					UNION ALL\
+					SELECT avatarUrl,nickName,mark FROM others\
+					ORDER BY mark DESC\
+					LIMIT 100')
+	world = cursor.fetchall()
+	redata['init']['lists'].append(world)
+	redata['init']['lists'].append(school)
+	cursor.execute('SELECT content FROM content')
+	redata['init']['content'] = cursor.fetchall()
+	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		mark = cursor.fetchall()
+		redata['number'] = mark[0][0]
+		flag = 0
+	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+		mark = cursor.fetchall()
+		redata['number'] = mark[0][0]
+		flag = 1
+	if flag == 0:
+		sql3 = "SELECT mark FROM students\
+				WHERE openid = '%s'" % (data['openID'])
+		cursor.execute(sql3)
+		mark = cursor.fetchall()
+		sql4 = "SELECT COUNT(*) as srank FROM students\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql4)
+		srank = cursor.fetchall()
+		redata['rank'][1] = srank[0][0] + 1
+		sql5 = "SELECT COUNT(*) as orank FROM others\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql5)
+		orank = cursor.fetchall()
+		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+	elif flag == 1:
+		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
+		cursor.execute(sql3)
+		mark = cursor.fetchall()
+		sql4 = "SELECT COUNT(*) as srank FROM students\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql4)
+		srank = cursor.fetchall()
+		redata['rank'][1] = srank[0][0] + 1
+		sql5 = "SELECT COUNT(*) as orank FROM others\
+				WHERE mark > '%d'" % (mark[0][0])
+		cursor.execute(sql5)
+		orank = cursor.fetchall()
+		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+	return json.dumps(redata, ensure_ascii=False)
+
+
 @app.route('/questionget', methods=['POST'])
 def questionget():
 	data = request.json
@@ -187,7 +319,6 @@ def questionget():
 		cursor.execute("SELECT did FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	did = cursor.fetchall()
-	print(did)
 	if did[0][0] == '0':
 		question_id = random.randrange(1, N[0][0]+1)
 	else:
@@ -239,11 +370,9 @@ def questionjudge():
 		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	temp = cursor.fetchall()
-	print(temp)
 	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
 	opr = cursor.fetchall()
 	redata['opr'] = opr[0][0]
-	print(redata['opr'])
 	if data['userOp'] == opr[0][0]:
 		redata['judge'] = True
 		if temp[0][2] == 0:
