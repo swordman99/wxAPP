@@ -82,12 +82,12 @@ def login():
 	if flag[0][0] == 0:
 		if data['type'] == 0:
 			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
-					values('%s', '%s', '%s', '%s', '%s', '%s', '')"\
+					values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
 					% (info['name'], info['number'], info['phone'],\
 					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
 			sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
-					values('%s', '%s', '%s', '%s', '')"\
+					values('%s', '%s', '%s', '%s', '0')"\
 					% (info['phone'],\
 					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 	else:
@@ -166,19 +166,21 @@ def login():
 @app.route('/questionget', methods=['POST'])
 def questionget():
 	data = request.json
+	print(data)
 	redata = {}
 	redata['title'] = ''
 	redata['op'] = []
 	cursor.execute("SELECT COUNT(*) FROM questions")
 	N = cursor.fetchall()
 	flag = 0
-	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) == 0:
+	if cursor.execute("SELECT did FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		pass
 	else:
-		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
+		cursor.execute("SELECT did FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	did = cursor.fetchall()
-	if did == ():
+	print(did)
+	if did[0][0] == '0':
 		question_id = random.randrange(1, N[0][0]+1)
 	else:
 		while 1:
@@ -213,7 +215,6 @@ def questionget():
 		cursor.rollback()
 		print("更新did错误")
 	print(N)
-	print(did)
 	print(redata)
 	return json.dumps(redata, ensure_ascii=False)
 
@@ -225,12 +226,14 @@ def questionjudge():
 	redata = {}
 	redata['judge'] = False
 	redata['opr'] = ''
-	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) == 0:
+	redata['number'] = 0
+	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		pass
 	else:
 		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	temp = cursor.fetchall()
+	print(temp)
 	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
 	opr = cursor.fetchall()
 	data['opr'] = opr[0][0]
@@ -296,6 +299,7 @@ def questionjudge():
 	else:
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
+	redata['number'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
