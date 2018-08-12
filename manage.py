@@ -166,7 +166,6 @@ def login():
 @app.route('/questionget', methods=['POST'])
 def questionget():
 	data = request.json
-	print(data)
 	redata = {}
 	redata['title'] = ''
 	redata['op'] = []
@@ -236,16 +235,17 @@ def questionjudge():
 	print(temp)
 	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
 	opr = cursor.fetchall()
-	data['opr'] = opr[0][0]
+	redata['opr'] = opr[0][0]
+	print(redata['opr'])
 	if data['userOp'] == opr[0][0]:
 		redata['judge'] = True
-		if temp[0][3] == 0:
+		if temp[0][2] == 0:
 			add = 1
-		elif temp[0][3] == 1:
+		elif temp[0][2] == 1:
 			add = 2
-		elif temp[0][3] == 2:
+		elif temp[0][2] == 2:
 			add = 4
-		elif temp[0][3] == 3:
+		elif temp[0][2] == 3:
 			add = 8
 		else:
 			add = 16
@@ -253,7 +253,7 @@ def questionjudge():
 			sql = "UPDATE students\
 				   SET mark = '%d',\
 				   conti = '%d'\
-				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, data['openID'])
+				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
@@ -264,7 +264,7 @@ def questionjudge():
 			sql = "UPDATE others\
 				   SET mark = '%d',\
 				   conti = '%d'\
-				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][3] + 1, data['openID'])
+				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
