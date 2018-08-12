@@ -172,10 +172,10 @@ def questionget():
 	cursor.execute("SELECT COUNT(*) FROM questions")
 	N = cursor.fetchall()
 	flag = 0
-	try:
-		cursor.execute("SELECT did FROM students WHERE openid = '%s'" % (data['openID']))
-	except:
-		cursor.execute("SELECT did FROM others WHERE openid = '%s'" % (data['openID']))
+	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) == 0:
+		pass
+	else:
+		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	did = cursor.fetchall()
 	if did == ():
