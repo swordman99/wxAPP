@@ -225,17 +225,16 @@ def questionjudge():
 	redata = {}
 	redata['judge'] = False
 	redata['opr'] = ''
-	redata['number'] = 0
-	try:
-		cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID']))
-	except:
+	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) == 0:
+		pass
+	else:
 		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	temp = cursor.fetchall()
 	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
 	opr = cursor.fetchall()
 	data['opr'] = opr[0][0]
-	if data['op'] == opr[0][0]:
+	if data['userOp'] == opr[0][0]:
 		redata['judge'] = True
 		if temp[0][3] == 0:
 			add = 1
@@ -297,6 +296,19 @@ def questionjudge():
 	else:
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
+	return json.dumps(redata, ensure_ascii=False)
+
+
+@app.route('/finish', methods=['POST'])
+def finish():
+	data = request.json
+	redata = {}
+	redata['number'] = 0
+	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		pass
+	else:
+		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+	mark = cursor.fetchall()
 	redata['number'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
