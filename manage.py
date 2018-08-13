@@ -444,11 +444,22 @@ def finish():
 	data = request.json
 	redata = {}
 	redata['number'] = 0
+	flag = 2
 	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		flag = 0
 		pass
 	else:
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+		flag = 1
 	mark = cursor.fetchall()
+	if flag == 0:
+		cursor.execute("UPDATE students \
+			SET conti = 0\
+			WHERE openid = '%s'" % (data['openID']))
+	elif flag == 1:
+		cursor.execute("UPDATE others \
+			SET conti = 0\
+			WHERE openid = '%s'" % (data['openID']))
 	redata['number'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
