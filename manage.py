@@ -310,6 +310,7 @@ def questionget():
 	redata = {}
 	redata['title'] = ''
 	redata['op'] = []
+	redata['num'] = 0
 	cursor.execute("SELECT COUNT(*) FROM questions")
 	N = cursor.fetchall()
 	flag = 0
@@ -353,6 +354,13 @@ def questionget():
 	except:
 		cursor.rollback()
 		print("更新did错误")
+	if flag == 0:
+		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
+	else:
+		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
+	redata['num'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
