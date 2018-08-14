@@ -353,6 +353,13 @@ def questionget():
 	except:
 		cursor.rollback()
 		print("更新did错误")
+	if flag == 0:
+		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
+	else:
+		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
+	redata['number'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
