@@ -44,16 +44,16 @@ def home():
 	flag = 2
 	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
-		redata['number'] = mark[0][0]
+		redata['num'] = mark[0][0]
 		redata['loged'] = True
 		flag = 0
 	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
-		redata['number'] = mark[0][0]
+		redata['num'] = mark[0][0]
 		redata['loged'] = True
 		flag = 1
 	else:
-		redata['number'] = 0
+		redata['num'] = 0
 	if flag == 0:
 		sql3 = "SELECT mark FROM students\
 				WHERE openid = '%s'" % (data['openID'])
@@ -113,7 +113,7 @@ def login():
 	redata = {}
 	redata['isMatch'] = True
 	redata['rank'] = [0, 0]
-	redata['number'] = 0
+	redata['num'] = 0
 	data = request.json
 	wxinfo = data['userInfo']
 	info = data['value']
@@ -152,7 +152,7 @@ def login():
 		if data['type'] == 0:
 			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
 					values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
-					% (info['name'], info['number'], info['phone'],\
+					% (info['name'], info['num'], info['phone'],\
 					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 		else:
 			sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
@@ -166,7 +166,7 @@ def login():
 			cursor.execute(sqlbu)
 			match = cursor.fetchall()
 			if match[0][0] == info['name']\
-			and match[0][1] == info['number']\
+			and match[0][1] == info['num']\
 			and match[0][2] == info['phone']:
 				redata['isMatch'] = True
 			else:
@@ -232,7 +232,7 @@ def login():
 			cursor.execute(sql5)
 			orank = cursor.fetchall()
 			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
-		redata['number'] = mark[0][0]
+		redata['num'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
@@ -241,7 +241,7 @@ def loginsuccess():
 	data = request.json
 	redata = {}
 	redata['rank'] = [0, 0]
-	redata['number'] = 0
+	redata['num'] = 0
 	redata['init'] = {}
 	redata['init']['sum'] = [0, 0]
 	redata['init']['lists'] = []
@@ -266,11 +266,11 @@ def loginsuccess():
 	redata['init']['content'] = cursor.fetchall()
 	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
-		redata['number'] = mark[0][0]
+		redata['num'] = mark[0][0]
 		flag = 0
 	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
-		redata['number'] = mark[0][0]
+		redata['num'] = mark[0][0]
 		flag = 1
 	if flag == 0:
 		sql3 = "SELECT mark FROM students\
@@ -363,7 +363,7 @@ def questionjudge():
 	redata = {}
 	redata['judge'] = False
 	redata['opr'] = ''
-	redata['number'] = 0
+	redata['num'] = 0
 	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		pass
 	else:
@@ -435,7 +435,7 @@ def questionjudge():
 	else:
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
-	redata['number'] = mark[0][0]
+	redata['num'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
@@ -443,7 +443,7 @@ def questionjudge():
 def finish():
 	data = request.json
 	redata = {}
-	redata['number'] = 0
+	redata['num'] = 0
 	flag = 2
 	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		flag = 0
@@ -460,7 +460,7 @@ def finish():
 		cursor.execute("UPDATE others \
 			SET conti = 0\
 			WHERE openid = '%s'" % (data['openID']))
-	redata['number'] = mark[0][0]
+	redata['num'] = mark[0][0]
 	return json.dumps(redata, ensure_ascii=False)
 
 
