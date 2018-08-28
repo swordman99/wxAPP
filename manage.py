@@ -6,9 +6,6 @@ import json
 import random
 import requests
 
-db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
-cursor = db.cursor()
-
 
 app = Flask(__name__)
 
@@ -22,6 +19,8 @@ def index():
 
 @app.route('/openid', methods=['POST'])
 def openid():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	data = request.json
 	url = 'https://api.weixin.qq.com/sns/jscode2session?' + \
 	'appid=wxb1240864091b21d6&' + \
@@ -32,11 +31,14 @@ def openid():
 	s1 = r.text
 	s2 = s1.split('"')
 	result = s2[7]
+	db.close()
 	return json.dumps(result, ensure_ascii=False)
 
 
 @app.route('/home', methods=['POST'])
 def home():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	data = request.json
 	redata = {}
 	redata['rank'] = [0, 0]
@@ -233,11 +235,14 @@ def login():
 			orank = cursor.fetchall()
 			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 		redata['num'] = mark[0][0]
+	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
 @app.route('/loginsuccess', methods=['POST'])
 def loginsuccess():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	data = request.json
 	redata = {}
 	redata['rank'] = [0, 0]
@@ -301,11 +306,14 @@ def loginsuccess():
 		cursor.execute(sql5)
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
 @app.route('/questionget', methods=['POST'])
 def questionget():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	data = request.json
 	redata = {}
 	redata['title'] = ''
@@ -361,11 +369,14 @@ def questionget():
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
 	redata['num'] = mark[0][0]
+	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
 @app.route('/questionjudge', methods=['POST'])
 def questionjudge():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	data = request.json
 	flag = 0
 	redata = {}
@@ -444,11 +455,14 @@ def questionjudge():
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
 	redata['num'] = mark[0][0]
+	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
 @app.route('/finish', methods=['POST'])
 def finish():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	data = request.json
 	redata = {}
 	redata['num'] = 0
@@ -469,6 +483,7 @@ def finish():
 			SET conti = 0\
 			WHERE openid = '%s'" % (data['openID']))
 	redata['num'] = mark[0][0]
+	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
