@@ -30,7 +30,6 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
-	print(s2)
 	result = s2[7]
 	db.close()
 	return json.dumps(result, ensure_ascii=False)
@@ -470,15 +469,27 @@ def finish():
 		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	mark = cursor.fetchall()
-	if flag == 0:
-		cursor.execute("UPDATE students \
-			SET conti = 0\
-			WHERE openid = '%s'" % (data['openID']))
-	elif flag == 1:
-		cursor.execute("UPDATE others \
-			SET conti = 0\
-			WHERE openid = '%s'" % (data['openID']))
 	redata['num'] = mark[0][0]
+	if flag == 0:
+		sql = "UPDATE students\
+			   SET conti = 0\
+			   WHERE openid = '%s'" % (data['openID'])
+		try:
+			cursor.execute(sql)
+			db.commit()
+		except:
+			cursor.rollback()
+			print("更新conti错误")
+	else:
+		sql = "UPDATE others\
+			   SET conti = 0\
+			   WHERE openid = '%s'" % (data['openID'])
+		try:
+			cursor.execute(sql)
+			db.commit()
+		except:
+			cursor.rollback()
+			print("更新conti错误")
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
