@@ -405,12 +405,8 @@ def questionjudge():
 			add = 1
 		elif temp[0][2] == 1:
 			add = 2
-		elif temp[0][2] == 2:
-			add = 4
-		elif temp[0][2] == 3:
-			add = 8
 		else:
-			add = 16
+			add = 4
 		if flag == 0:
 			sql = "UPDATE students\
 				   SET mark = '%d',\
@@ -437,8 +433,8 @@ def questionjudge():
 		redata['judge'] = False
 		if flag == 0:
 			sql = "UPDATE students\
-				   SET conti = '%d'\
-				   WHERE openid = '%s'" % (0, data['openID'])
+				   SET conti = 0\
+				   WHERE openid = '%s'" % (data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
@@ -447,8 +443,8 @@ def questionjudge():
 				print("更新conti错误")
 		else:
 			sql = "UPDATE others\
-				   SET conti = '%d'\
-				   WHERE openid = '%s'" % (0, data['openID'])
+				   SET conti = 0\
+				   WHERE openid = '%s'" % (data['openID'])
 			try:
 				cursor.execute(sql)
 				db.commit()
