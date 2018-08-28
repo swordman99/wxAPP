@@ -22,6 +22,8 @@ def openid():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
 	data = request.json
+	redata = {}
+	redata['openID'] = ''
 	url = 'https://api.weixin.qq.com/sns/jscode2session?' + \
 	'appid=wxb1240864091b21d6&' + \
 	'secret=da85186c1ca4474c7f95ea15bb21b4b7&' + \
@@ -30,9 +32,34 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
-	result = s2[7]
+	redata['openID'] = s2[7]
 	db.close()
-	return json.dumps(result, ensure_ascii=False)
+	return json.dumps(redata, ensure_ascii=False)
+
+
+@app.route('/freq', methods=['POST'])
+def freq():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
+	data = request.json
+	redata = {}
+	redata['freq'] = 0
+	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		freq = cursor.fetchall()
+		redata['freq'] = freq[0][0] + 1
+		cursor.execute("UPDATE students \
+						SET freq = '%d' \
+						WHERE openid = '%s'" % (redata['freq'], data['openID']))
+		db.commit()
+	elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+		freq = cursor.fetchall()
+		redata['freq'] = freq[0][0] + 1
+		cursor.execute("UPDATE others \
+						SET freq = '%d' \
+						WHERE openid = '%s'" % (redata['freq'], data['openID']))
+		db.commit()
+	db.close()
+	return json.dumps(redata, ensure_ascii=False)
 
 
 @app.route('/home', methods=['POST'])
