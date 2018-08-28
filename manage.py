@@ -30,6 +30,7 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
+	print(s2)
 	result = s2[7]
 	db.close()
 	return json.dumps(result, ensure_ascii=False)
@@ -112,6 +113,8 @@ def home():
 
 @app.route('/login', methods=['POST'])
 def login():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
 	redata = {}
 	redata['isMatch'] = True
 	redata['rank'] = [0, 0]
