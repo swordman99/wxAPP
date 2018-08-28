@@ -390,7 +390,6 @@ def questionjudge():
 	redata = {}
 	redata['judge'] = False
 	redata['opr'] = ''
-	redata['num'] = 0
 	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		pass
 	else:
@@ -456,13 +455,6 @@ def questionjudge():
 			except:
 				cursor.rollback()
 				print("更新conti错误")
-	if flag == 0:
-		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
-		mark = cursor.fetchall()
-	else:
-		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
-		mark = cursor.fetchall()
-	redata['num'] = mark[0][0]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
