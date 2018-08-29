@@ -37,8 +37,26 @@ def openid():
 	return json.dumps(redata, ensure_ascii=False)
 
 
-@app.route('/freq', methods=['POST'])
-def freq():
+@app.route('/getfreq', methods=['POST'])
+def getfreq():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
+	data = request.json
+	redata = {}
+	redata['freq'] = 0
+	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		freq = cursor.fetchall()
+		redata['freq'] = freq[0][0] + 1
+	elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+		freq = cursor.fetchall()
+		redata['freq'] = freq[0][0] + 1
+	print(redata)
+	db.close()
+	return json.dumps(redata, ensure_ascii=False)
+
+
+@app.route('/setfreq', methods=['POST'])
+def setfreq():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
 	data = request.json
@@ -58,6 +76,7 @@ def freq():
 						SET freq = '%d' \
 						WHERE openid = '%s'" % (redata['freq'], data['openID']))
 		db.commit()
+	print(redata)
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
