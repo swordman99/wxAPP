@@ -202,8 +202,8 @@ def login():
 	    cursor.execute(sql2)
 	    db.commit()
 	    print(haha)
-	    if data['type'] == 0:
-	    	import mail
+	    #if data['type'] == 0:
+	    #	import mail
 	except:
 		db.rollback()
 		print('插入信息错误')
@@ -218,7 +218,7 @@ def login():
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
 		srank = cursor.fetchall()
-		redata['rank'][1] = 0
+		redata['rank'][1] = srank[0][0] + 1
 		sql5 = "SELECT COUNT(*) as orank FROM others\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql5)
