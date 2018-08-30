@@ -144,6 +144,7 @@ def home():
 		cursor.execute(sql5)
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+	#更新排行榜
 	redata['init'] = {}
 	redata['init']['sum'] = [0, 0]
 	redata['init']['lists'] = []
@@ -154,13 +155,13 @@ def home():
 	numwai = cursor.fetchall()
 	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
 	redata['init']['sum'][1] = numnei[0][0]
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
 	school = cursor.fetchall()
 	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
 					UNION ALL\
 					SELECT avatarUrl,nickName,mark FROM others\
 					ORDER BY mark DESC\
-					LIMIT 100')
+					LIMIT 10')
 	world = cursor.fetchall()
 	redata['init']['lists'].append(world)
 	redata['init']['lists'].append(school)
@@ -236,13 +237,13 @@ def login():
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	redata['num'] = mark[0][0]
 	#更新排行榜
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
 	school = cursor.fetchall()
 	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
 					UNION ALL\
 					SELECT avatarUrl,nickName,mark FROM others\
 					ORDER BY mark DESC\
-					LIMIT 100')
+					LIMIT 10')
 	world = cursor.fetchall()
 	redata['init']['lists'].append(world)
 	redata['init']['lists'].append(school)
