@@ -208,9 +208,7 @@ def login():
 	finally:
 		pass
 	#更新排名
-	if data['type'] == 0:
-		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
-		cursor.execute(sql3)
+	if cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
 		if mark == ():
 			mark = [[0]]
@@ -225,8 +223,7 @@ def login():
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	else:
-		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
-		cursor.execute(sql3)
+		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
 		if mark == ():
 			mark = [[0]]
