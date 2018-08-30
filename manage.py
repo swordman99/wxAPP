@@ -177,6 +177,11 @@ def login():
 	cursor = db.cursor()
 	redata = {}
 	redata['isMatch'] = True
+	redata['rank'] = [0, 0]
+	redata['num'] = 0
+	redata['init'] = {}
+	redata['init']['sum'] = [0, 0]
+	redata['init']['lists'] = []
 	data = request.json
 	wxinfo = data['userInfo']
 	info = data['value']
@@ -194,7 +199,7 @@ def login():
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    print("插入用户信息成功")
+	    print("插入信息成功")
 	    if data['type'] == 0:
 	    	import mail
 	except:
@@ -202,20 +207,6 @@ def login():
 		print('插入或更新错误')
 	finally:
 		pass
-	db.close()
-	return json.dumps(redata, ensure_ascii=False)
-
-
-@app.route('/loginget',methods='POST')
-def loginget():
-	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
-	cursor = db.cursor()
-	data = request.json
-	redata = {}
-	redata['init'] = {}
-	redata['init']['sum'] = [0, 0]
-	redata['init']['lists'] = []
-	redata['num'] = 0
 	#更新排名
 	if data['type'] == 0:
 		sql3 = "SELECT mark FROM students\
@@ -250,9 +241,8 @@ def loginget():
 		cursor.execute(sql5)
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
-	print("排名")
-	#更新分数
 	redata['num'] = mark[0][0]
+	print("排名")
 	#更新排行榜
 	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
 	school = cursor.fetchall()
