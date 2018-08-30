@@ -76,7 +76,6 @@ def setfreq():
 						SET freq = '%d' \
 						WHERE openid = '%s'" % (redata['freq'], data['openID']))
 		db.commit()
-	print(redata)
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
@@ -171,6 +170,22 @@ def login():
 	redata['init']['sum'] = [0, 0]
 	redata['init']['lists'] = []
 	redata['init']['content'] = []
+	cursor.execute('SELECT COUNT(*) as numnei FROM students')
+	numnei = cursor.fetchall()
+	cursor.execute('SELECT COUNT(*) as numwai FROM others')
+	numwai = cursor.fetchall()
+	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
+	redata['init']['sum'][1] = numnei[0][0]
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
+	school = cursor.fetchall()
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
+					UNION ALL\
+					SELECT avatarUrl,nickName,mark FROM others\
+					ORDER BY mark DESC\
+					LIMIT 100')
+	world = cursor.fetchall()
+	redata['init']['lists'].append(world)
+	redata['init']['lists'].append(school)
 	sql1s = "SELECT COUNT(*) as flags FROM students \
 			WHERE openid = '%s'" % (data['openID'])
 	cursor.execute(sql1s)
@@ -254,11 +269,14 @@ def login():
 			sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 			cursor.execute(sql3)
 			mark = cursor.fetchall()
-			sql4 = "SELECT COUNT(*) as srank FROM students\
-					WHERE mark > '%d'" % (mark[0][0])
-			cursor.execute(sql4)
-			srank = cursor.fetchall()
-			redata['rank'][1] = srank[0][0] + 1
+			if data['type'] == 0:
+				sql4 = "SELECT COUNT(*) as srank FROM students\
+						WHERE mark > '%d'" % (mark[0][0])
+				cursor.execute(sql4)
+				srank = cursor.fetchall()
+				redata['rank'][1] = srank[0][0] + 1
+			else:
+				redata['rank'][0] = 'x'
 			sql5 = "SELECT COUNT(*) as orank FROM others\
 					WHERE mark > '%d'" % (mark[0][0])
 			cursor.execute(sql5)
@@ -276,18 +294,6 @@ def login():
 		pass
 	finally:
 		pass
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
-	school = cursor.fetchall()
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
-					UNION ALL\
-					SELECT avatarUrl,nickName,mark FROM others\
-					ORDER BY mark DESC\
-					LIMIT 100')
-	world = cursor.fetchall()
-	redata['init']['lists'].append(world)
-	redata['init']['lists'].append(school)
-	cursor.execute('SELECT content FROM content')
-	redata['init']['content'] = cursor.fetchall()
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
@@ -300,28 +306,6 @@ def loginsuccess():
 	redata = {}
 	redata['rank'] = [0, 0]
 	redata['num'] = 0
-	redata['init'] = {}
-	redata['init']['sum'] = [0, 0]
-	redata['init']['lists'] = []
-	redata['init']['content'] = []
-	cursor.execute('SELECT COUNT(*) as numnei FROM students')
-	numnei = cursor.fetchall()
-	cursor.execute('SELECT COUNT(*) as numwai FROM others')
-	numwai = cursor.fetchall()
-	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
-	redata['init']['sum'][1] = numnei[0][0]
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
-	school = cursor.fetchall()
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
-					UNION ALL\
-					SELECT avatarUrl,nickName,mark FROM others\
-					ORDER BY mark DESC\
-					LIMIT 100')
-	world = cursor.fetchall()
-	redata['init']['lists'].append(world)
-	redata['init']['lists'].append(school)
-	cursor.execute('SELECT content FROM content')
-	redata['init']['content'] = cursor.fetchall()
 	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
 		redata['num'] = mark[0][0]
@@ -335,11 +319,14 @@ def loginsuccess():
 				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
-		sql4 = "SELECT COUNT(*) as srank FROM students\
-				WHERE mark > '%d'" % (mark[0][0])
-		cursor.execute(sql4)
-		srank = cursor.fetchall()
-		redata['rank'][1] = srank[0][0] + 1
+		if data['type'] == 0:
+			sql4 = "SELECT COUNT(*) as srank FROM students\
+					WHERE mark > '%d'" % (mark[0][0])
+			cursor.execute(sql4)
+			srank = cursor.fetchall()
+			redata['rank'][1] = srank[0][0] + 1
+		else:
+			redata['rank'][0] = 'x'
 		sql5 = "SELECT COUNT(*) as orank FROM others\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql5)
