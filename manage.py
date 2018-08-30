@@ -208,7 +208,7 @@ def login():
 	finally:
 		pass
 	#更新排名
-	if cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
 		if mark == ():
 			mark = [[0]]
