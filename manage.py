@@ -207,6 +207,7 @@ def login():
 		print('插入或更新错误')
 	finally:
 		pass
+	return json.dumps(redata, ensure_ascii=False)
 	#更新排名
 	if data['type'] == 0:
 		sql3 = "SELECT mark FROM students\
