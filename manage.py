@@ -218,7 +218,7 @@ def login():
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
 		srank = cursor.fetchall()
-		redata['rank'][1] = srank[0][0] + 1
+		redata['rank'][1] = 0
 		sql5 = "SELECT COUNT(*) as orank FROM others\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql5)
