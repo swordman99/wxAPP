@@ -209,8 +209,7 @@ def login():
 		pass
 	#更新排名
 	if data['type'] == 0:
-		sql3 = "SELECT mark FROM students\
-				WHERE openid = '%s'" % (data['openID'])
+		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
 		if mark == ():
