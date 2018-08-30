@@ -241,6 +241,7 @@ def login():
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	redata['num'] = mark[0][0]
+	print("排名")
 	#更新排行榜
 	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
 	school = cursor.fetchall()
@@ -252,6 +253,7 @@ def login():
 	world = cursor.fetchall()
 	redata['init']['lists'].append(world)
 	redata['init']['lists'].append(school)
+	print("排行榜")
 	#更新人数
 	cursor.execute('SELECT COUNT(*) as numnei FROM students')
 	numnei = cursor.fetchall()
@@ -259,6 +261,7 @@ def login():
 	numwai = cursor.fetchall()
 	redata['init']['sum'][1] = numnei[0][0]
 	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
+	print("人数")
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
