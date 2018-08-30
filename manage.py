@@ -32,6 +32,7 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
+	print(s2)
 	redata['openID'] = s2[7]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
@@ -50,7 +51,6 @@ def getfreq():
 	elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
 		redata['freq'] = freq[0][0] + 1
-	print(redata)
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
