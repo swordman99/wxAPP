@@ -32,7 +32,6 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
-	print(s2)
 	redata['openID'] = s2[7]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
@@ -47,10 +46,10 @@ def getfreq():
 	redata['freq'] = 0
 	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
-		redata['freq'] = freq[0][0] + 1
+		redata['freq'] = freq[0][0]
 	elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
-		redata['freq'] = freq[0][0] + 1
+		redata['freq'] = freq[0][0]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
@@ -64,17 +63,17 @@ def setfreq():
 	redata['freq'] = 0
 	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
-		redata['freq'] = freq[0][0] + 1
+		redata['freq'] = freq[0][0]
 		cursor.execute("UPDATE students \
 						SET freq = '%d' \
-						WHERE openid = '%s'" % (redata['freq'], data['openID']))
+						WHERE openid = '%s'" % (redata['freq'] + 1, data['openID']))
 		db.commit()
 	elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
-		redata['freq'] = freq[0][0] + 1
+		redata['freq'] = freq[0][0]
 		cursor.execute("UPDATE others \
 						SET freq = '%d' \
-						WHERE openid = '%s'" % (redata['freq'], data['openID']))
+						WHERE openid = '%s'" % (redata['freq'] + 1, data['openID']))
 		db.commit()
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
@@ -85,27 +84,35 @@ def home():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
 	data = request.json
+	wxinfo = data['userInfo']
 	redata = {}
 	redata['rank'] = [0, 0]
 	redata['loged'] = False
 	flag = 2
 	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
-		mark = cursor.fetchall()
-		redata['num'] = mark[0][0]
-		redata['loged'] = True
 		flag = 0
+		mark = cursor.fetchall()
+		redata['num'] = mark[0][0]  # 更新分数
+		redata['loged'] = True  # 登录成功
+		# 更新昵称、头像
+		cursor.execute("UPDATE students\
+					SET nickName = '%s',\
+					avatarUrl = '%s'\
+					WHERE openid = '%s'"\
+					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
 	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+		flag = 1
 		mark = cursor.fetchall()
 		redata['num'] = mark[0][0]
 		redata['loged'] = True
-		flag = 1
+		cursor.execute("UPDATE others\
+					SET nickName = '%s',\
+					avatarUrl = '%s'\
+					WHERE openid = '%s'"\
+					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
 	else:
 		redata['num'] = 0
 	if flag == 0:
-		sql3 = "SELECT mark FROM students\
-				WHERE openid = '%s'" % (data['openID'])
-		cursor.execute(sql3)
-		mark = cursor.fetchall()
 		sql4 = "SELECT COUNT(*) as srank FROM students\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
@@ -117,14 +124,11 @@ def home():
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	elif flag == 1:
-		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
-		cursor.execute(sql3)
-		mark = cursor.fetchall()
 		sql4 = "SELECT COUNT(*) as srank FROM students\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
 		srank = cursor.fetchall()
-		redata['rank'][1] = srank[0][0] + 1
+		redata['rank'][1] = 'x'
 		sql5 = "SELECT COUNT(*) as orank FROM others\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql5)
@@ -163,153 +167,35 @@ def login():
 	redata['isMatch'] = True
 	redata['rank'] = [0, 0]
 	redata['num'] = 0
+	redata['init'] = {}
+	redata['init']['sum'] = [0, 0]
+	redata['init']['lists'] = []
 	data = request.json
 	wxinfo = data['userInfo']
 	info = data['value']
-	sql1s = "SELECT COUNT(*) as flags FROM students \
-			WHERE openid = '%s'" % (data['openID'])
-	cursor.execute(sql1s)
-	flags = cursor.fetchall()
-	sql1o = "SELECT COUNT(*) as flago FROM others \
-			WHERE openid = '%s'" % (data['openID'])
-	cursor.execute(sql1o)
-	flago = cursor.fetchall()
-	flag = flags[0][0] + flago[0][0]
-	if flag == 0:
-		if data['type'] == 0:
-			sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
-					values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
-					% (info['name'], info['num'], info['phone'],\
-					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
-		else:
-			sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
-					values('%s', '%s', '%s', '%s', '0')"\
-					% (info['phone'],\
-					wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
+	#插入用户信息
+	if data['type'] == 0:
+		sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
+				values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
+				% (info['name'], info['num'], info['phone'],\
+				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 	else:
-		if data['type'] == 0:
-			sqlbu = "SELECT name, stuid, phone FROM students\
-					 WHERE openid = '%s'" % (data['openID'])
-			cursor.execute(sqlbu)
-			match = cursor.fetchall()
-			if match[0][0] == info['name']\
-			and match[0][1] == info['num']\
-			and match[0][2] == info['phone']:
-				redata['isMatch'] = True
-			else:
-				redata['isMatch'] = False
-				return json.dumps(redata, ensure_ascii=False)
-			sql2 = "UPDATE students\
-					SET nickName = '%s',\
-					avatarUrl = '%s'\
-					WHERE openid = '%s'"\
-					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
-		else:
-			sqlbu = "SELECT phone FROM others \
-			WHERE openid = '%s'" % (data['openID'])
-			cursor.execute(sqlbu)
-			match = cursor.fetchall()
-			if match[0][0] == info['phone']:
-				redata['isMatch'] = True
-			else:
-				redata['isMatch'] = False
-				return json.dumps(redata, ensure_ascii=False)
-			redata['isMatch'] = False
-			return json.dumps(redata, ensure_ascii=False)
-			sql2 = "UPDATE others\
-					SET nickName = '%s',\
-					avatarUrl = '%s'\
-					WHERE openid = '%s'"\
-					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
+		sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
+				values('%s', '%s', '%s', '%s', '0')"\
+				% (info['phone'],\
+				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    if flag == 0 and data['type'] == 0:
+	    if data['type'] == 0:
 	    	import mail
 	except:
 		db.rollback()
 		print('插入或更新错误')
 	finally:
 		pass
-	'''	if flag != 0:
-		if data['type'] == 0:
-			sql3 = "SELECT mark FROM students\
-					WHERE openid = '%s'" % (data['openID'])
-			cursor.execute(sql3)
-			mark = cursor.fetchall()
-			sql4 = "SELECT COUNT(*) as srank FROM students\
-					WHERE mark > '%d'" % (mark[0][0])
-			cursor.execute(sql4)
-			srank = cursor.fetchall()
-			redata['rank'][1] = srank[0][0] + 1
-			sql5 = "SELECT COUNT(*) as orank FROM others\
-					WHERE mark > '%d'" % (mark[0][0])
-			cursor.execute(sql5)
-			orank = cursor.fetchall()
-			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
-		else:
-			sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
-			cursor.execute(sql3)
-			mark = cursor.fetchall()
-			if data['type'] == 0:
-				sql4 = "SELECT COUNT(*) as srank FROM students\
-						WHERE mark > '%d'" % (mark[0][0])
-				cursor.execute(sql4)
-				srank = cursor.fetchall()
-				redata['rank'][1] = srank[0][0] + 1
-			else:
-				redata['rank'][0] = 'x'
-			sql5 = "SELECT COUNT(*) as orank FROM others\
-					WHERE mark > '%d'" % (mark[0][0])
-			cursor.execute(sql5)
-			orank = cursor.fetchall()
-			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
-		redata['num'] = mark[0][0]'''
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
-	school = cursor.fetchall()
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
-					UNION ALL\
-					SELECT avatarUrl,nickName,mark FROM others\
-					ORDER BY mark DESC\
-					LIMIT 100')
-	world = cursor.fetchall()
-	redata['init']['lists'].append(world)
-	redata['init']['lists'].append(school)
-	redata['init'] = {}
-	redata['init']['sum'] = [0, 0]
-	redata['init']['lists'] = []
-	cursor.execute('SELECT COUNT(*) as numnei FROM students')
-	numnei = cursor.fetchall()
-	cursor.execute('SELECT COUNT(*) as numwai FROM others')
-	numwai = cursor.fetchall()
-	try:
-		redata['init']['sum'][1] = numnei[0][0]
-		redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
-	except:
-		pass
-	finally:
-		pass
-	db.close()
-	return json.dumps(redata, ensure_ascii=False)
-
-
-@app.route('/loginsuccess', methods=['POST'])
-def loginsuccess():
-	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
-	cursor = db.cursor()
-	data = request.json
-	redata = {}
-	redata['rank'] = [0, 0]
-	redata['num'] = 0
-	if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
-		mark = cursor.fetchall()
-		redata['num'] = mark[0][0]
-		flag = 0
-	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
-		mark = cursor.fetchall()
-		redata['num'] = mark[0][0]
-		flag = 1
-	if flag == 0:
+	#更新排名
+	if data['type'] == 0:
 		sql3 = "SELECT mark FROM students\
 				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
@@ -324,7 +210,7 @@ def loginsuccess():
 		cursor.execute(sql5)
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
-	elif flag == 1:
+	else:
 		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
@@ -338,6 +224,25 @@ def loginsuccess():
 		cursor.execute(sql5)
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+	redata['num'] = mark[0][0]
+	#更新排行榜
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 100')
+	school = cursor.fetchall()
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
+					UNION ALL\
+					SELECT avatarUrl,nickName,mark FROM others\
+					ORDER BY mark DESC\
+					LIMIT 100')
+	world = cursor.fetchall()
+	redata['init']['lists'].append(world)
+	redata['init']['lists'].append(school)
+	#更新人数
+	cursor.execute('SELECT COUNT(*) as numnei FROM students')
+	numnei = cursor.fetchall()
+	cursor.execute('SELECT COUNT(*) as numwai FROM others')
+	numwai = cursor.fetchall()
+	redata['init']['sum'][1] = numnei[0][0]
+	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
