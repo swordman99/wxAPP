@@ -319,7 +319,7 @@ def loginsuccess():
 				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
-		if data['type'] == 0:
+		if flag == 0:
 			sql4 = "SELECT COUNT(*) as srank FROM students\
 					WHERE mark > '%d'" % (mark[0][0])
 			cursor.execute(sql4)
