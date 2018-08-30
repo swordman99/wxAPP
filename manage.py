@@ -122,6 +122,7 @@ def home():
 			print('更新昵称、头像错误')
 	else:
 		redata['num'] = 0
+	#更新人数
 	if flag == 0:
 		sql4 = "SELECT COUNT(*) as srank FROM students\
 				WHERE mark > '%d'" % (mark[0][0])
@@ -207,6 +208,8 @@ def login():
 		pass
 	#更新排名
 	if data['type'] == 0:
+		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
 		sql3 = "SELECT mark FROM students\
 				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
@@ -222,6 +225,8 @@ def login():
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	else:
+		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+		mark = cursor.fetchall()
 		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
