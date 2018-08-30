@@ -186,22 +186,75 @@ def login():
 	wxinfo = data['userInfo']
 	info = data['value']
 	#插入用户信息
-	if data['type'] == 0:
+	if data['type'] == 0 and \
+	cursor.execute("SELECT openid FROM students WHERE openid = '%s'" % (data['openID'])) == 0:
 		sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
 				values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
 				% (info['name'], info['num'], info['phone'],\
 				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
-		haha = "哈哈"
-	elif data['type'] == 1:
+	elif data['type'] == 1 and\
+	cursor.execute("SELECT openid FROM others WHERE openid = '%s'" % (data['openID'])) == 0:
 		sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
 				values('%s', '%s', '%s', '%s', '0')"\
 				% (info['phone'],\
 				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
-		haha = "尼玛"
+	else:
+		#更新排名
+		if cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+			mark = cursor.fetchall()
+			if mark == ():
+				mark = [[0]]
+			sql4 = "SELECT COUNT(*) as srank FROM students\
+					WHERE mark > '%d'" % (mark[0][0])
+			cursor.execute(sql4)
+			srank = cursor.fetchall()
+			redata['rank'][1] = srank[0][0] + 1
+			sql5 = "SELECT COUNT(*) as orank FROM others\
+					WHERE mark > '%d'" % (mark[0][0])
+			cursor.execute(sql5)
+			orank = cursor.fetchall()
+			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+		elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+			mark = cursor.fetchall()
+			if mark == ():
+				mark = [[0]]
+			sql4 = "SELECT COUNT(*) as srank FROM students\
+					WHERE mark > '%d'" % (mark[0][0])
+			cursor.execute(sql4)
+			srank = cursor.fetchall()
+			redata['rank'][1] = 0
+			sql5 = "SELECT COUNT(*) as orank FROM others\
+					WHERE mark > '%d'" % (mark[0][0])
+			cursor.execute(sql5)
+			orank = cursor.fetchall()
+			redata['rank'][0] = srank[0][0] + orank[0][0] + 1
+		redata['num'] = mark[0][0]
+		print("排名")
+		#更新排行榜
+		cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
+		school = cursor.fetchall()
+		cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
+						UNION ALL\
+						SELECT avatarUrl,nickName,mark FROM others\
+						ORDER BY mark DESC\
+						LIMIT 10')
+		world = cursor.fetchall()
+		redata['init']['lists'].append(world)
+		redata['init']['lists'].append(school)
+		print("排行榜")
+		#更新人数
+		cursor.execute('SELECT COUNT(*) as numnei FROM students')
+		numnei = cursor.fetchall()
+		cursor.execute('SELECT COUNT(*) as numwai FROM others')
+		numwai = cursor.fetchall()
+		redata['init']['sum'][1] = numnei[0][0]
+		redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
+		print("人数")
+		db.close()
+		return json.dumps(redata, ensure_ascii=False)
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    print(haha)
 	    if data['type'] == 0:
 	    	import mail
 	except:
