@@ -175,9 +175,6 @@ def home():
 def login():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
-	redata = "试试"
-	db.close()
-	return json.dumps(redata, ensure_ascii=False)
 	redata = {}
 	redata['isMatch'] = True
 	redata['rank'] = [0, 0]
