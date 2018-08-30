@@ -208,12 +208,12 @@ def login():
 		pass
 	#更新排名
 	if data['type'] == 0:
-		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
-		mark = cursor.fetchall()
 		sql3 = "SELECT mark FROM students\
 				WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
+		if mark == ():
+			mark = [[0]]
 		sql4 = "SELECT COUNT(*) as srank FROM students\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
@@ -225,11 +225,11 @@ def login():
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
 	else:
-		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
-		mark = cursor.fetchall()
 		sql3 = "SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])
 		cursor.execute(sql3)
 		mark = cursor.fetchall()
+		if mark == ():
+			mark = [[0]]
 		sql4 = "SELECT COUNT(*) as srank FROM students\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
