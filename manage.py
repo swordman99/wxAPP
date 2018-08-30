@@ -175,6 +175,9 @@ def home():
 def login():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
+	redata = "试试"
+	db.close()
+	return json.dumps(redata, ensure_ascii=False)
 	redata = {}
 	redata['isMatch'] = True
 	redata['rank'] = [0, 0]
@@ -204,10 +207,9 @@ def login():
 	    	import mail
 	except:
 		db.rollback()
-		print('插入或更新错误')
+		print('插入信息错误')
 	finally:
 		pass
-	return json.dumps(redata, ensure_ascii=False)
 	#更新排名
 	if data['type'] == 0:
 		sql3 = "SELECT mark FROM students\
