@@ -191,15 +191,17 @@ def login():
 				values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
 				% (info['name'], info['num'], info['phone'],\
 				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
+		haha = "哈哈"
 	elif data['type'] == 1:
 		sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
 				values('%s', '%s', '%s', '%s', '0')"\
 				% (info['phone'],\
 				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
+		haha = "尼玛"
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    print("插入信息成功")
+	    print(haha)
 	    if data['type'] == 0:
 	    	import mail
 	except:
