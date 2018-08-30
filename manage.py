@@ -100,6 +100,11 @@ def home():
 					avatarUrl = '%s'\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
+		try:
+			db.commit()
+		except:
+			db.rollback()
+			print('更新昵称、头像错误')
 	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		flag = 1
 		mark = cursor.fetchall()
@@ -110,6 +115,11 @@ def home():
 					avatarUrl = '%s'\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
+		try:
+			db.commit()
+		except:
+			db.rollback()
+			print('更新昵称、头像错误')
 	else:
 		redata['num'] = 0
 	if flag == 0:
@@ -128,7 +138,7 @@ def home():
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
 		srank = cursor.fetchall()
-		redata['rank'][1] = 'x'
+		redata['rank'][1] = 0
 		sql5 = "SELECT COUNT(*) as orank FROM others\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql5)
@@ -218,7 +228,7 @@ def login():
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql4)
 		srank = cursor.fetchall()
-		redata['rank'][1] = 'x'
+		redata['rank'][1] = 0
 		sql5 = "SELECT COUNT(*) as orank FROM others\
 				WHERE mark > '%d'" % (mark[0][0])
 		cursor.execute(sql5)
