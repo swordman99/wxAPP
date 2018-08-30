@@ -199,6 +199,7 @@ def login():
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
+	    print("插入用户信息成功")
 	    if data['type'] == 0:
 	    	import mail
 	except:
