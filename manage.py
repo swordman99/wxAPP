@@ -191,7 +191,7 @@ def login():
 				values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
 				% (info['name'], info['num'], info['phone'],\
 				wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
-	else:
+	elif data['type'] == 1:
 		sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
 				values('%s', '%s', '%s', '%s', '0')"\
 				% (info['phone'],\
@@ -222,8 +222,7 @@ def login():
 		cursor.execute(sql5)
 		orank = cursor.fetchall()
 		redata['rank'][0] = srank[0][0] + orank[0][0] + 1
-	else:
-		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+	elif cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		mark = cursor.fetchall()
 		if mark == ():
 			mark = [[0]]
