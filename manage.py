@@ -255,8 +255,8 @@ def login():
 	try:
 	    cursor.execute(sql2)
 	    db.commit()
-	    if data['type'] == 0:
-	    	import mail
+	    #if data['type'] == 0:
+	    #	import mail
 	except:
 		db.rollback()
 		print('插入信息错误')
