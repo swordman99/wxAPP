@@ -13,7 +13,7 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     s1 = '<h1>欢迎！</h1>'
-    s2 = '<a href="http://www.miitbeian.gov.cn">京ICP证18040938号</a>'
+    s2 = '<a href="http://www.miitbeian.gov.cn">京ICP备18040938号-1</a>'
     return s1 + s2
 
 
