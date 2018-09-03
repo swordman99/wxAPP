@@ -20,7 +20,7 @@ def index():
     s6 = '<h>万分感谢！万分感谢！</h>'
     s7 = '<h>还有，不知因为什么原因010-82510330的电话在工作时间也无法打通。</h>'
     s = '<a href="http://www.miitbeian.gov.cn">京ICP备18040938号-1</a>'
-    return s1 + s2 + s3 + s4 + s5 + s
+    return s1 + s2 + s3 + s4 + s5 + s6 + s7 + s
 
 
 @app.route('/openid', methods=['POST'])
