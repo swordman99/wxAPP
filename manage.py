@@ -44,12 +44,13 @@ def getfreq():
 	data = request.json
 	redata = {}
 	redata['last'] = 0
+	freqall = 3
 	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
-		redata['last'] = 10 - freq[0][0]
+		redata['last'] = freqall - freq[0][0]
 	elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
-		redata['last'] = 10 - freq[0][0]
+		redata['last'] = freqall - freq[0][0]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
