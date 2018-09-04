@@ -58,7 +58,7 @@ def getfreq():
 		freq = cursor.fetchall()
 		redata['last'] = freqall - freq[0][0]
 	db.close()
-	redata['nexttime'] = '2017年9月17日'
+	redata['nexttime'] = '9月17日'
 	return json.dumps(redata, ensure_ascii=False)
 
 
