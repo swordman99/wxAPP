@@ -169,6 +169,7 @@ def home():
 	redata['init']['lists'].append(school)
 	cursor.execute('SELECT content FROM content')
 	redata['init']['content'] = cursor.fetchall()
+	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
@@ -314,6 +315,8 @@ def login():
 	redata['init']['sum'][1] = numnei[0][0]
 	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
 	print("人数")
+	cursor.execute('SELECT content FROM content')
+	redata['init']['content'] = cursor.fetchall()
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
