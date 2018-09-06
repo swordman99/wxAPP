@@ -361,33 +361,27 @@ def questionget():
 		for i in range(1, 5):
 			redata['op'].append(question[0][i])
 		if flag == 0:
-			sql1 = "UPDATE students\
-				   SET did = '%s'\
-				   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
-			sql2 = "UPDATE students\
-					SET lastdid = '%d'\
-					WHERE openid = '%s'" % (question_id, data['openID'])
-			sql3 = "UPDATE students\
-					SET qfreq = '%d'\
-					WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
+			sql = "UPDATE students\
+				   SET did = '%s',\
+					lastdid = '%d',\
+					lastjudge = 0,\
+					qfreq = '%d'\
+					WHERE openid = '%s'" % \
+					(did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1, data['openID'])
 		else:
-			sql1 = "UPDATE others\
-				   SET did = '%s'\
-				   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
-			sql2 = "UPDATE others\
-					SET lastdid = '%d'\
-					WHERE openid = '%s'" % (question_id, data['openID'])
-			sql3 = "UPDATE others\
-					SET qfreq = '%d'\
-					WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
+			sql = "UPDATE others\
+				   SET did = '%s',\
+					lastdid = '%d',\
+					lastjudge = 0,\
+					qfreq = '%d'\
+					WHERE openid = '%s'" % \
+					(did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1, data['openID'])
 		try:
-			cursor.execute(sql1)
-			cursor.execute(sql2)
-			cursor.execute(sql3)
+			cursor.execute(sql)
 			db.commit()
 		except:
 			cursor.rollback()
-			print("更新did、lastdid或qfreq错误")
+			print("更新错误")
 		if flag == 0:
 			cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
 			mark = cursor.fetchall()
