@@ -98,7 +98,7 @@ def home():
 		# 更新昵称、头像
 		cursor.execute("UPDATE students\
 					SET nickName = '%s',\
-					avatarUrl = '%s'\
+					avatarUrl = '%s',\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
 		try:
@@ -113,7 +113,7 @@ def home():
 		redata['loged'] = True
 		cursor.execute("UPDATE others\
 					SET nickName = '%s',\
-					avatarUrl = '%s'\
+					avatarUrl = '%s',\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
 		try:
@@ -344,56 +344,57 @@ def questionget():
 		cursor.execute("SELECT qfreq FROM others WHERE openid = '%s'" % (data['openID']))
 		qfreq = cursor.fetchall()
 		flag = 1
-	if qfreq[0][0] > 33:
+	if qfreq[0][0] > 30:
 		return "请勿作弊"
-	if did[0][0] == '0':
-		question_id = random.randrange(1, N[0][0]+1)
 	else:
-		while 1:
+		if did[0][0] == '0':
 			question_id = random.randrange(1, N[0][0]+1)
-			if str(question_id) not in did[0][0]:
-				break
-	cursor.execute("SELECT title, opa, opb, opc, opd FROM questions\
-			WHERE id = '%d'" % (question_id))
-	question = cursor.fetchall()
-	redata['title'] = question[0][0]
-	for i in range(1, 5):
-		redata['op'].append(question[0][i])
-	if flag == 0:
-		sql1 = "UPDATE students\
-			   SET did = '%s'\
-			   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
-		sql2 = "UPDATE students\
-				SET lastdid = '%d'\
-				WHERE openid = '%s'" % (question_id, data['openID'])
-		sql3 = "UPDATE students\
-				SET qfreq = '%d'\
-				WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
-	else:
-		sql1 = "UPDATE others\
-			   SET did = '%s'\
-			   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
-		sql2 = "UPDATE others\
-				SET lastdid = '%d'\
-				WHERE openid = '%s'" % (question_id, data['openID'])
-		sql3 = "UPDATE others\
-				SET qfreq = '%d'\
-				WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
-	try:
-		cursor.execute(sql1)
-		cursor.execute(sql2)
-		cursor.execute(sql3)
-		db.commit()
-	except:
-		cursor.rollback()
-		print("更新did、lastdid或qfreq错误")
-	if flag == 0:
-		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
-		mark = cursor.fetchall()
-	else:
-		cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
-		mark = cursor.fetchall()
-	redata['num'] = mark[0][0]
+		else:
+			while 1:
+				question_id = random.randrange(1, N[0][0]+1)
+				if str(question_id) not in did[0][0]:
+					break
+		cursor.execute("SELECT title, opa, opb, opc, opd FROM questions\
+				WHERE id = '%d'" % (question_id))
+		question = cursor.fetchall()
+		redata['title'] = question[0][0]
+		for i in range(1, 5):
+			redata['op'].append(question[0][i])
+		if flag == 0:
+			sql1 = "UPDATE students\
+				   SET did = '%s'\
+				   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
+			sql2 = "UPDATE students\
+					SET lastdid = '%d'\
+					WHERE openid = '%s'" % (question_id, data['openID'])
+			sql3 = "UPDATE students\
+					SET qfreq = '%d'\
+					WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
+		else:
+			sql1 = "UPDATE others\
+				   SET did = '%s'\
+				   WHERE openid = '%s'" % (did[0][0] + ' ' + str(question_id), data['openID'])
+			sql2 = "UPDATE others\
+					SET lastdid = '%d'\
+					WHERE openid = '%s'" % (question_id, data['openID'])
+			sql3 = "UPDATE others\
+					SET qfreq = '%d'\
+					WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
+		try:
+			cursor.execute(sql1)
+			cursor.execute(sql2)
+			cursor.execute(sql3)
+			db.commit()
+		except:
+			cursor.rollback()
+			print("更新did、lastdid或qfreq错误")
+		if flag == 0:
+			cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
+			mark = cursor.fetchall()
+		else:
+			cursor.execute("SELECT mark FROM others WHERE openid = '%s'" % (data['openID']))
+			mark = cursor.fetchall()
+		redata['num'] = mark[0][0]
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
@@ -407,68 +408,73 @@ def questionjudge():
 	redata = {}
 	redata['judge'] = False
 	redata['opr'] = ''
-	if cursor.execute("SELECT lastdid,mark,conti FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+	if cursor.execute("SELECT lastdid,mark,conti,lastjudge FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		pass
 	else:
-		cursor.execute("SELECT lastdid,mark,conti FROM others WHERE openid = '%s'" % (data['openID']))
+		cursor.execute("SELECT lastdid,mark,conti,lastjudge FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	temp = cursor.fetchall()
-	cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
-	opr = cursor.fetchall()
-	redata['opr'] = opr[0][0]
-	if data['userOp'] == opr[0][0]:
-		redata['judge'] = True
-		if temp[0][2] == 0:
-			add = 1
-		elif temp[0][2] == 1:
-			add = 2
-		else:
-			add = 4
-		if flag == 0:
-			sql = "UPDATE students\
-				   SET mark = '%d',\
-				   conti = '%d'\
-				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
-			try:
-				cursor.execute(sql)
-				db.commit()
-			except:
-				cursor.rollback()
-				print("更新分数错误")
-		else:
-			sql = "UPDATE others\
-				   SET mark = '%d',\
-				   conti = '%d'\
-				   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
-			try:
-				cursor.execute(sql)
-				db.commit()
-			except:
-				cursor.rollback()
-				print("更新分数错误")
+	if temp[0][3] == 1:
+		return "请勿作弊"
 	else:
-		redata['judge'] = False
-		if flag == 0:
-			sql = "UPDATE students\
-				   SET conti = 0\
-				   WHERE openid = '%s'" % (data['openID'])
-			try:
-				cursor.execute(sql)
-				db.commit()
-			except:
-				cursor.rollback()
-				print("更新conti错误")
+		cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
+		opr = cursor.fetchall()
+		redata['opr'] = opr[0][0]
+		if data['userOp'] == opr[0][0]:
+			redata['judge'] = True
+			if temp[0][2] == 0:
+				add = 1
+			elif temp[0][2] == 1:
+				add = 2
+			else:
+				add = 4
+			if flag == 0:
+				sql = "UPDATE students\
+					   SET mark = '%d',\
+					   conti = '%d',\
+					   lastjudge = 1\
+					   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
+				try:
+					cursor.execute(sql)
+					db.commit()
+				except:
+					cursor.rollback()
+					print("更新分数错误")
+			else:
+				sql = "UPDATE others\
+					   SET mark = '%d',\
+					   conti = '%d',\
+					   lastjudge = 1\
+					   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
+				try:
+					cursor.execute(sql)
+					db.commit()
+				except:
+					cursor.rollback()
+					print("更新分数错误")
 		else:
-			sql = "UPDATE others\
-				   SET conti = 0\
-				   WHERE openid = '%s'" % (data['openID'])
-			try:
-				cursor.execute(sql)
-				db.commit()
-			except:
-				cursor.rollback()
-				print("更新conti错误")
-	db.close()
+			redata['judge'] = False
+			if flag == 0:
+				sql = "UPDATE students\
+					   SET conti = 0\
+					   WHERE openid = '%s'" % (data['openID'])
+				try:
+					cursor.execute(sql)
+					db.commit()
+				except:
+					cursor.rollback()
+					print("更新conti错误")
+			else:
+				sql = "UPDATE others\
+					   SET conti = 0\
+					   WHERE openid = '%s'" % (data['openID'])
+				try:
+					cursor.execute(sql)
+					db.commit()
+				except:
+					cursor.rollback()
+					print("更新conti错误")
+		db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
 
