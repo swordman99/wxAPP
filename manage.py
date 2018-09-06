@@ -98,7 +98,7 @@ def home():
 		# 更新昵称、头像
 		cursor.execute("UPDATE students\
 					SET nickName = '%s',\
-					avatarUrl = '%s',\
+					avatarUrl = '%s'\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
 		try:
@@ -113,7 +113,7 @@ def home():
 		redata['loged'] = True
 		cursor.execute("UPDATE others\
 					SET nickName = '%s',\
-					avatarUrl = '%s',\
+					avatarUrl = '%s'\
 					WHERE openid = '%s'"\
 					% (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
 		try:
