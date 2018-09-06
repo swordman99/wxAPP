@@ -14,7 +14,8 @@ sql = '''CREATE TABLE others(
           conti int DEFAULT 0,
           mark int DEFAULT 0,
           level int,
-          freq int DEFAULT 0
+          freq int DEFAULT 0,
+          qfreq int DEFAULT 0,
           )
           DEFAULT CHARSET=UTF8MB4'''
 try:

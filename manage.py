@@ -332,13 +332,20 @@ def questionget():
 	redata['num'] = 0
 	cursor.execute("SELECT COUNT(*) FROM questions")
 	N = cursor.fetchall()
-	flag = 0
+	flag = 2
 	if cursor.execute("SELECT did FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
-		pass
+		did = cursor.fetchall()
+		cursor.execute("SELECT qfreq FROM students WHERE openid = '%s'" % (data['openID']))
+		qfreq = cursor.fetchall()
+		flag = 0
 	else:
 		cursor.execute("SELECT did FROM others WHERE openid = '%s'" % (data['openID']))
+		did = cursor.fetchall()
+		cursor.execute("SELECT qfreq FROM others WHERE openid = '%s'" % (data['openID']))
+		qfreq = cursor.fetchall()
 		flag = 1
-	did = cursor.fetchall()
+	if qfreq[0][0] > 33:
+		return "请勿作弊"
 	if did[0][0] == '0':
 		question_id = random.randrange(1, N[0][0]+1)
 	else:
@@ -359,6 +366,9 @@ def questionget():
 		sql2 = "UPDATE students\
 				SET lastdid = '%d'\
 				WHERE openid = '%s'" % (question_id, data['openID'])
+		sql3 = "UPDATE students\
+				SET qfreq = '%d'\
+				WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
 	else:
 		sql1 = "UPDATE others\
 			   SET did = '%s'\
@@ -366,13 +376,17 @@ def questionget():
 		sql2 = "UPDATE others\
 				SET lastdid = '%d'\
 				WHERE openid = '%s'" % (question_id, data['openID'])
+		sql3 = "UPDATE others\
+				SET qfreq = '%d'\
+				WHERE openid = '%s'" % (qfreq[0][0] + 1, data['openID'])
 	try:
 		cursor.execute(sql1)
 		cursor.execute(sql2)
+		cursor.execute(sql3)
 		db.commit()
 	except:
 		cursor.rollback()
-		print("更新did错误")
+		print("更新did、lastdid或qfreq错误")
 	if flag == 0:
 		cursor.execute("SELECT mark FROM students WHERE openid = '%s'" % (data['openID']))
 		mark = cursor.fetchall()
