@@ -42,7 +42,7 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
-	redata['openID'] = SHA1(to_bytes(s2[7]))
+	redata['openID'] = SHA1(to_bytes(SHA1(to_bytes(s2[7]))))
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 
@@ -358,7 +358,6 @@ def questionget():
 	if qfreq[0][0] > 30:
 		return "请勿作弊"
 	else:
-		print(did)
 		if did[0][0] == '0':
 			question_id = random.randrange(1, N[0][0]+1)
 		else:
@@ -366,11 +365,9 @@ def questionget():
 				question_id = random.randrange(1, N[0][0]+1)
 				if str(question_id) not in did[0][0]:
 					break
-		print(question_id)
 		cursor.execute("SELECT title, opa, opb, opc, opd FROM questions\
 				WHERE id = '%d'" % (question_id))
 		question = cursor.fetchall()
-		print(question)
 		redata['title'] = question[0][0]
 		for i in range(1, 5):
 			redata['op'].append(question[0][i])
