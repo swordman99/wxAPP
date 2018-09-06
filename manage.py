@@ -5,6 +5,7 @@ import os
 import json
 import random
 import requests
+import hashlib
 
 
 app = Flask(__name__)
@@ -31,7 +32,7 @@ def openid():
 	r = requests.get(url)
 	s1 = r.text
 	s2 = s1.split('"')
-	redata['openID'] = s2[7]
+	redata['openID'] = hashlib.sha1(s2[7])
 	db.close()
 	return json.dumps(redata, ensure_ascii=False)
 

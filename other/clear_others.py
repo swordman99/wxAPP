@@ -2,7 +2,7 @@ import pymysql
 import os
 db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 cursor = db.cursor()
-cursor.execute('DROP TABLE IF EXISTS students')
+cursor.execute('DROP TABLE IF EXISTS others')
 sql = '''CREATE TABLE others(
           id int PRIMARY KEY AUTO_INCREMENT,
           phone char(20) NOT NULL,
