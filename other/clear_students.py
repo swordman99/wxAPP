@@ -12,7 +12,7 @@ sql = '''CREATE TABLE students(
           avatarUrl text NOT NULL,
           openid text NOT NULL,
           did text,
-          lastdid int,
+          lastdid int DEFAULT 0,
           conti int DEFAULT 0,
           mark int DEFAULT 0,
           level int,
