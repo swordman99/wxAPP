@@ -19,7 +19,8 @@ sql = '''CREATE TABLE students(
           freq int DEFAULT 0,
           finalid char(8),
           qfreq int DEFAULT 0,
-          lastjudge int DEFAULT 0
+          lastjudge int DEFAULT 0,
+          oprtemp int DEFAULT 0
           )
           DEFAULT CHARSET=UTF8MB4'''
 try:
