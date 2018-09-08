@@ -332,6 +332,7 @@ def login():
 	return json.dumps(redata, ensure_ascii=False)
 
 
+opr_global = 0
 @app.route('/questionget', methods=['POST'])
 def questionget():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
@@ -365,13 +366,25 @@ def questionget():
 				question_id = random.randrange(1, N[0][0]+1)
 				if str(question_id) not in did[0][0]:
 					break
-		cursor.execute("SELECT title, opa, opb, opc, opd FROM questions\
+		cursor.execute("SELECT title, opa, opb, opc, opd, opr FROM questions\
 				WHERE id = '%d'" % (question_id))
 		question = cursor.fetchall()
 		redata['title'] = question[0][0]
-		for i in range(1, 5):
-			redata['op'].append(question[0][i])
-		random.shuffle(redata['op'])
+		temp = 0
+		if question[0][5] == 'a':
+			temp = 1
+		elif question[0][5] == 'b':
+			temp = 2
+		elif question[0][5] == 'c':
+			temp = 3
+		elif question[0][5] == 'd':
+			temp = 4
+		lst = [1, 2, 3, 4]
+		random.shuffle(lst)
+		for i in range(len(lst)):
+			if lst[i] == temp:
+				opr_global = i
+			redata['op'].append(question[0][lst[i]])
 		if flag == 0:
 			sql = "UPDATE students\
 				   SET did = '%s',\
@@ -423,10 +436,16 @@ def questionjudge():
 	if temp[0][3] == 1:
 		return "请勿作弊"
 	else:
-		cursor.execute("SELECT opr FROM questions WHERE id = '%d'" % (temp[0][0]))
-		opr = cursor.fetchall()
-		redata['opr'] = opr[0][0]
-		if data['userOp'] == opr[0][0]:
+		if opr_global == 1:
+			opr = 'a'
+		elif opr_global == 2:
+			opr = 'b'
+		elif opr_global == 3:
+			opr = 'c'
+		elif opr_global == 4:
+			opr = 'd'
+		redata['opr'] = opr
+		if data['userOp'] == opr:
 			redata['judge'] = True
 			if temp[0][2] == 0:
 				add = 1
