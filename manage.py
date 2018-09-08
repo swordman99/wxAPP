@@ -383,7 +383,7 @@ def questionget():
 		random.shuffle(lst)
 		for i in range(len(lst)):
 			if lst[i] == temp:
-				opr_global = i
+				opr_global = i + 1
 			redata['op'].append(question[0][lst[i]])
 		if flag == 0:
 			sql = "UPDATE students\
@@ -436,6 +436,7 @@ def questionjudge():
 	if temp[0][3] == 1:
 		return "请勿作弊"
 	else:
+		print(opr_global)
 		if opr_global == 1:
 			opr = 'a'
 		elif opr_global == 2:
