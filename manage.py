@@ -371,6 +371,7 @@ def questionget():
 		redata['title'] = question[0][0]
 		for i in range(1, 5):
 			redata['op'].append(question[0][i])
+		redata['op'] = random.shuffle(redata['op'])
 		if flag == 0:
 			sql = "UPDATE students\
 				   SET did = '%s',\
