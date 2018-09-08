@@ -332,7 +332,6 @@ def login():
 	return json.dumps(redata, ensure_ascii=False)
 
 
-opr_global = 0
 @app.route('/questionget', methods=['POST'])
 def questionget():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
@@ -342,6 +341,7 @@ def questionget():
 	redata['title'] = ''
 	redata['op'] = []
 	redata['num'] = 0
+	oprtemp = 0
 	cursor.execute("SELECT COUNT(*) FROM questions")
 	N = cursor.fetchall()
 	flag = 2
@@ -383,24 +383,28 @@ def questionget():
 		random.shuffle(lst)
 		for i in range(len(lst)):
 			if lst[i] == temp:
-				opr_global = i + 1
+				oprtemp = i + 1
 			redata['op'].append(question[0][lst[i]])
 		if flag == 0:
 			sql = "UPDATE students\
 				   SET did = '%s',\
 					lastdid = '%d',\
 					lastjudge = 0,\
-					qfreq = '%d'\
+					qfreq = '%d',\
+					oprtemp = '%d'\
 					WHERE openid = '%s'" % \
-					(did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1, data['openID'])
+					(did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1,\
+					 oprtemp, data['openID'])
 		else:
 			sql = "UPDATE others\
 				   SET did = '%s',\
 					lastdid = '%d',\
 					lastjudge = 0,\
-					qfreq = '%d'\
+					qfreq = '%d',\
+					oprtemp = '%d'\
 					WHERE openid = '%s'" % \
-					(did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1, data['openID'])
+					(did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1,\
+					 oprtemp, data['openID'])
 		try:
 			cursor.execute(sql)
 			db.commit()
@@ -423,30 +427,30 @@ def questionjudge():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
 	data = request.json
-	flag = 0
+	flag = 2
 	redata = {}
 	redata['judge'] = False
 	redata['opr'] = ''
-	if cursor.execute("SELECT lastdid,mark,conti,lastjudge FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
-		pass
+	opr = ''
+	if cursor.execute("SELECT lastdid,mark,conti,lastjudge,oprtemp FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		flag = 0
 	else:
-		cursor.execute("SELECT lastdid,mark,conti,lastjudge FROM others WHERE openid = '%s'" % (data['openID']))
+		cursor.execute("SELECT lastdid,mark,conti,lastjudge,oprtemp FROM others WHERE openid = '%s'" % (data['openID']))
 		flag = 1
 	temp = cursor.fetchall()
 	if temp[0][3] == 1:
 		return "请勿作弊"
 	else:
-		print(opr_global)
-		if opr_global == 1:
+		if temp[0][4] == 1:
 			opr = 'a'
-		elif opr_global == 2:
+		elif temp[0][4] == 2:
 			opr = 'b'
-		elif opr_global == 3:
+		elif temp[0][4] == 3:
 			opr = 'c'
-		elif opr_global == 4:
+		elif temp[0][4] == 4:
 			opr = 'd'
 		redata['opr'] = opr
-		if data['userOp'] == opr:
+		if data['userOp'] == redata['opr']:
 			redata['judge'] = True
 			if temp[0][2] == 0:
 				add = 1
