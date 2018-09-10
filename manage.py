@@ -54,7 +54,7 @@ def getfreq():
 	data = request.json
 	redata = {}
 	redata['last'] = 0
-	freqall = 3
+	freqall = 5
 	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
 		redata['last'] = freqall - freq[0][0]
@@ -62,7 +62,7 @@ def getfreq():
 		freq = cursor.fetchall()
 		redata['last'] = freqall - freq[0][0]
 	db.close()
-	redata['nexttime'] = '9月17日'
+	redata['nexttime'] = '10月1日'
 	return json.dumps(redata, ensure_ascii=False)
 
 
