@@ -54,7 +54,7 @@ def getfreq():
 	data = request.json
 	redata = {}
 	redata['last'] = 0
-	freqall = 2
+	freqall = 4
 	if cursor.execute("SELECT freq FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
 		freq = cursor.fetchall()
 		redata['last'] = freqall - freq[0][0]
@@ -62,7 +62,7 @@ def getfreq():
 		freq = cursor.fetchall()
 		redata['last'] = freqall - freq[0][0]
 	db.close()
-	redata['nexttime'] = '10月1日'
+	redata['nexttime'] = '11月30日'
 	return json.dumps(redata, ensure_ascii=False)
 
 
@@ -356,7 +356,7 @@ def questionget():
 		cursor.execute("SELECT qfreq FROM others WHERE openid = '%s'" % (data['openID']))
 		qfreq = cursor.fetchall()
 		flag = 1
-	if qfreq[0][0] > 20:
+	if qfreq[0][0] > 40:
 		return "请勿作弊"
 	else:
 		if did[0][0] == '0':
