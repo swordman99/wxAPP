@@ -549,5 +549,45 @@ def finish():
 	return json.dumps(redata, ensure_ascii=False)
 
 
+'''@app.route('/sharereward', methods=['POST'])
+def sharereward():
+	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
+	cursor = db.cursor()
+	data = request.json
+	redata = {}
+	if cursor.execute("SELECT sharefreq,mark FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
+		temp = cursor.fetchall()
+		if temp[0][0] >= 5:
+			redata['flag'] = 0
+		else:
+			redata['flag'] = 1
+		sql = "UPDATE students\
+			   SET mark = '%d',\
+			   WHERE openid = '%s'" % (temp[0][1] + 1, data['openID'])
+		try:
+			cursor.execute(sql)
+			db.commit()
+		except:
+			cursor.rollback()
+			print("更新分数错误")
+	elif cursor.execute("SELECT sharefreq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
+		temp = cursor.fetchall()
+		if temp[0][0] >= 5:
+			redata['flag'] = 0
+		else:
+			redata['flag'] = 1
+		sql = "UPDATE others\
+			   SET mark = '%d',\
+			   WHERE openid = '%s'" % (temp[0][1] + 1, data['openID'])
+		try:
+			cursor.execute(sql)
+			db.commit()
+		except:
+			cursor.rollback()
+			print("更新分数错误")
+	db.close()
+	return json.dumps(redata, ensure_ascii=False)'''
+
+
 if __name__ == '__main__':
     app.run(debug=True)
