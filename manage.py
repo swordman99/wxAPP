@@ -358,7 +358,7 @@ def questionget():
 		cursor.execute("SELECT qfreq FROM others WHERE openid = '%s'" % (data['openID']))
 		qfreq = cursor.fetchall()
 		flag = 1
-	if qfreq[0][0] > 40:
+	if qfreq[0][0] > 50:
 		return "请勿作弊"
 	else:
 		if did[0][0] == '0':
