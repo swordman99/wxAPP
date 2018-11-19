@@ -2,7 +2,7 @@ import pymysql
 import os
 db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 cursor = db.cursor()
-#cursor.execute('DROP TABLE IF EXISTS students')
+cursor.execute('DROP TABLE IF EXISTS students')
 sql1 = '''CREATE TABLE students(
           id int PRIMARY KEY AUTO_INCREMENT,
           name varchar(25) NOT NULL,
@@ -22,7 +22,7 @@ sql1 = '''CREATE TABLE students(
           lastjudge int DEFAULT 0,
           oprtemp int DEFAULT 0
           )DEFAULT CHARSET=UTF8MB4'''
-#cursor.execute('DROP TABLE IF EXISTS others')
+cursor.execute('DROP TABLE IF EXISTS others')
 sql2 = '''CREATE TABLE others(
           id int PRIMARY KEY AUTO_INCREMENT,
           phone char(20) NOT NULL,
@@ -39,7 +39,7 @@ sql2 = '''CREATE TABLE others(
           lastjudge int DEFAULT 0,
           oprtemp int DEFAULT 0
           )DEFAULT CHARSET=UTF8MB4'''
-#cursor.execute('DROP TABLE IF EXISTS questions')
+cursor.execute('DROP TABLE IF EXISTS questions')
 sql3 = '''CREATE TABLE questions(
           id int PRIMARY KEY AUTO_INCREMENT,
           title text NOT NULL,
@@ -48,7 +48,7 @@ sql3 = '''CREATE TABLE questions(
           opc text NOT NULL,
           opd text NOT NULL,
           opr char(2))DEFAULT CHARSET=UTF8MB4'''
-#cursor.execute('DROP TABLE IF EXISTS content')
+cursor.execute('DROP TABLE IF EXISTS content')
 sql4 = '''CREATE TABLE content(
           id int PRIMARY KEY AUTO_INCREMENT,
           content text
