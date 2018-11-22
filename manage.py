@@ -41,7 +41,6 @@ def openid():
 	'&grant_type=authorization_code'
 	r = requests.get(url)
 	s1 = r.text
-	print(s1)
 	s2 = s1.split('"')
 	redata['openID'] = SHA1(to_bytes(SHA1(to_bytes(s2[7]))))
 	db.close()
