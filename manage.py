@@ -62,7 +62,7 @@ def getfreq():
 		freq = cursor.fetchall()
 		redata['last'] = freqall - freq[0][0]
 	db.close()
-	redata['nexttime'] = '暂定12月1日' #您的本轮挑战次数已达上限或本轮挑战已截止，下轮开始时间：
+	redata['nexttime'] = '暂定2019年1月1日' #您的本轮挑战次数已达上限或本轮挑战已截止，下轮开始时间：
 	return json.dumps(redata, ensure_ascii=False)
 
 
