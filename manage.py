@@ -36,11 +36,12 @@ def openid():
 	redata['openID'] = ''
 	url = 'https://api.weixin.qq.com/sns/jscode2session?' + \
 	'appid=wxb1240864091b21d6&' + \
-	'secret=da85186c1ca4474c7f95ea15bb21b4b7&' + \
+	'secret=12a582c373d8187b98d5ba1572984f27&' + \
 	'js_code=' + data['code'] + \
 	'&grant_type=authorization_code'
 	r = requests.get(url)
 	s1 = r.text
+	print(s1)
 	s2 = s1.split('"')
 	redata['openID'] = SHA1(to_bytes(SHA1(to_bytes(s2[7]))))
 	db.close()
