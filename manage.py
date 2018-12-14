@@ -338,6 +338,7 @@ def login():
 def questionget():
 	db = pymysql.connect('127.0.0.1', 'root', os.environ.get('MYSQL_PASSWORD'), 'demo')
 	cursor = db.cursor()
+	abandoned = '492 525'
 	data = request.json
 	redata = {}
 	redata['title'] = ''
@@ -366,7 +367,7 @@ def questionget():
 		else:
 			while 1:
 				question_id = random.randrange(1, N[0][0]+1)
-				if str(question_id) not in did[0][0]:
+				if (str(question_id) not in did[0][0]) and (str(question_id) not in abandoned):
 					break
 		cursor.execute("SELECT title, opa, opb, opc, opd, opr FROM questions\
 				WHERE id = '%d'" % (question_id))
