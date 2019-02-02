@@ -170,11 +170,11 @@ def home():
 	numwai = cursor.fetchall()
 	redata['init']['sum'][0] = numwai[0][0] + numnei[0][0]
 	redata['init']['sum'][1] = numnei[0][0]
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students WHERE mark>0 ORDER BY mark DESC LIMIT 10')
 	school = cursor.fetchall()
-	cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
+	cursor.execute('SELECT avatarUrl,nickName,mark FROM students WHERE mark>0\
 					UNION ALL\
-					SELECT avatarUrl,nickName,mark FROM others\
+					SELECT avatarUrl,nickName,mark FROM others WHERE mark>0\
 					ORDER BY mark DESC\
 					LIMIT 10')
 	world = cursor.fetchall()
