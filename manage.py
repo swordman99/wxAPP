@@ -1,5 +1,4 @@
-from flask import Flask
-from flask import request
+from flask import Flask, make_response, request
 import pymysql
 import os
 import json
@@ -603,7 +602,16 @@ def sharereward():
             cursor.rollback()
             print("更新conti错误")
     db.close()
-    return json.dumps(redata, ensure_ascii=False)
+    return json.dumps(redata, ensure_ascii = False)
+
+
+# show photo
+@app.route('/beijing', methods=['GET'])
+def beijing():
+    image_data = open(os.path.dirname(os.path.realpath(__file__)) + '/image/1.jpg', "rb").read()
+    response = make_response(image_data)
+    response.headers['Content-Type'] = 'image/jpg'
+    return response
 
 
 if __name__ == '__main__':
