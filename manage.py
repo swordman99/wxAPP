@@ -83,15 +83,15 @@ def setfreq():
         freq = cursor.fetchall()
         redata['freq'] = freq[0][0]
         cursor.execute("UPDATE students \
-						SET freq = '%d' \
-						WHERE openid = '%s'" % (redata['freq'] + 1, data['openID']))
+                        SET freq = '%d' \
+                        WHERE openid = '%s'" % (redata['freq'] + 1, data['openID']))
         db.commit()
     elif cursor.execute("SELECT freq FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
         freq = cursor.fetchall()
         redata['freq'] = freq[0][0]
         cursor.execute("UPDATE others \
-						SET freq = '%d' \
-						WHERE openid = '%s'" % (redata['freq'] + 1, data['openID']))
+                        SET freq = '%d' \
+                        WHERE openid = '%s'" % (redata['freq'] + 1, data['openID']))
         db.commit()
     db.close()
     return json.dumps(redata, ensure_ascii=False)
@@ -116,9 +116,9 @@ def home():
         redata['loged'] = True  # 登录成功
         # 更新昵称、头像
         cursor.execute("UPDATE students\
-					SET nickName = '%s',\
-					avatarUrl = '%s'\
-					WHERE openid = '%s'"
+                    SET nickName = '%s',\
+                    avatarUrl = '%s'\
+                    WHERE openid = '%s'"
                        % (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
         try:
             db.commit()
@@ -131,9 +131,9 @@ def home():
         redata['num'] = mark[0][0]
         redata['loged'] = True
         cursor.execute("UPDATE others\
-					SET nickName = '%s',\
-					avatarUrl = '%s'\
-					WHERE openid = '%s'"
+                    SET nickName = '%s',\
+                    avatarUrl = '%s'\
+                    WHERE openid = '%s'"
                        % (wxinfo['nickName'], wxinfo['avatarUrl'], data['openID']))
         try:
             db.commit()
@@ -145,23 +145,23 @@ def home():
     # 更新人数
     if flag == 0:
         sql4 = "SELECT COUNT(*) as srank FROM students\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql4)
         srank = cursor.fetchall()
         redata['rank'][1] = srank[0][0] + 1
         sql5 = "SELECT COUNT(*) as orank FROM others\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql5)
         orank = cursor.fetchall()
         redata['rank'][0] = srank[0][0] + orank[0][0] + 1
     elif flag == 1:
         sql4 = "SELECT COUNT(*) as srank FROM students\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql4)
         srank = cursor.fetchall()
         redata['rank'][1] = 0
         sql5 = "SELECT COUNT(*) as orank FROM others\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql5)
         orank = cursor.fetchall()
         redata['rank'][0] = srank[0][0] + orank[0][0] + 1
@@ -180,10 +180,10 @@ def home():
         'SELECT avatarUrl,nickName,mark FROM students WHERE mark>0 ORDER BY mark DESC LIMIT 10')
     school = cursor.fetchall()
     cursor.execute('SELECT avatarUrl,nickName,mark FROM students WHERE mark>0\
-					UNION ALL\
-					SELECT avatarUrl,nickName,mark FROM others WHERE mark>0\
-					ORDER BY mark DESC\
-					LIMIT 10')
+                    UNION ALL\
+                    SELECT avatarUrl,nickName,mark FROM others WHERE mark>0\
+                    ORDER BY mark DESC\
+                    LIMIT 10')
     world = cursor.fetchall()
     redata['init']['lists'].append(world)
     redata['init']['lists'].append(school)
@@ -212,13 +212,13 @@ def login():
     if data['type'] == 0 and \
             cursor.execute("SELECT openid FROM students WHERE openid = '%s'" % (data['openID'])) == 0:
         sql2 = "INSERT INTO students(name, stuid, phone, nickName, avatarUrl, openid, did)\
-				values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
+                values('%s', '%s', '%s', '%s', '%s', '%s', '0')"\
                         % (info['name'], info['num'], info['phone'],
                            wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
     elif data['type'] == 1 and\
             cursor.execute("SELECT openid FROM others WHERE openid = '%s'" % (data['openID'])) == 0:
         sql2 = "INSERT INTO others(phone, nickName, avatarUrl, openid, did)\
-				values('%s', '%s', '%s', '%s', '0')"\
+                values('%s', '%s', '%s', '%s', '0')"\
                         % (info['phone'],
                            wxinfo['nickName'], wxinfo['avatarUrl'], data['openID'])
     else:
@@ -228,12 +228,12 @@ def login():
             if mark == ():
                 mark = [[0]]
             sql4 = "SELECT COUNT(*) as srank FROM students\
-					WHERE mark > '%d'" % (mark[0][0])
+                    WHERE mark > '%d'" % (mark[0][0])
             cursor.execute(sql4)
             srank = cursor.fetchall()
             redata['rank'][1] = srank[0][0] + 1
             sql5 = "SELECT COUNT(*) as orank FROM others\
-					WHERE mark > '%d'" % (mark[0][0])
+                    WHERE mark > '%d'" % (mark[0][0])
             cursor.execute(sql5)
             orank = cursor.fetchall()
             redata['rank'][0] = srank[0][0] + orank[0][0] + 1
@@ -242,12 +242,12 @@ def login():
             if mark == ():
                 mark = [[0]]
             sql4 = "SELECT COUNT(*) as srank FROM students\
-					WHERE mark > '%d'" % (mark[0][0])
+                    WHERE mark > '%d'" % (mark[0][0])
             cursor.execute(sql4)
             srank = cursor.fetchall()
             redata['rank'][1] = 0
             sql5 = "SELECT COUNT(*) as orank FROM others\
-					WHERE mark > '%d'" % (mark[0][0])
+                    WHERE mark > '%d'" % (mark[0][0])
             cursor.execute(sql5)
             orank = cursor.fetchall()
             redata['rank'][0] = srank[0][0] + orank[0][0] + 1
@@ -258,10 +258,10 @@ def login():
             'SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
         school = cursor.fetchall()
         cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
-						UNION ALL\
-						SELECT avatarUrl,nickName,mark FROM others\
-						ORDER BY mark DESC\
-						LIMIT 10')
+                        UNION ALL\
+                        SELECT avatarUrl,nickName,mark FROM others\
+                        ORDER BY mark DESC\
+                        LIMIT 10')
         world = cursor.fetchall()
         redata['init']['lists'].append(world)
         redata['init']['lists'].append(school)
@@ -280,7 +280,7 @@ def login():
         cursor.execute(sql2)
         db.commit()
         # if data['type'] == 0:
-        #	import mail
+        #   import mail
     except:
         db.rollback()
         print('插入信息错误')
@@ -292,12 +292,12 @@ def login():
         if mark == ():
             mark = [[0]]
         sql4 = "SELECT COUNT(*) as srank FROM students\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql4)
         srank = cursor.fetchall()
         redata['rank'][1] = srank[0][0] + 1
         sql5 = "SELECT COUNT(*) as orank FROM others\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql5)
         orank = cursor.fetchall()
         redata['rank'][0] = srank[0][0] + orank[0][0] + 1
@@ -306,12 +306,12 @@ def login():
         if mark == ():
             mark = [[0]]
         sql4 = "SELECT COUNT(*) as srank FROM students\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql4)
         srank = cursor.fetchall()
         redata['rank'][1] = 0
         sql5 = "SELECT COUNT(*) as orank FROM others\
-				WHERE mark > '%d'" % (mark[0][0])
+                WHERE mark > '%d'" % (mark[0][0])
         cursor.execute(sql5)
         orank = cursor.fetchall()
         redata['rank'][0] = srank[0][0] + orank[0][0] + 1
@@ -322,10 +322,10 @@ def login():
         'SELECT avatarUrl,nickName,mark FROM students ORDER BY mark DESC LIMIT 10')
     school = cursor.fetchall()
     cursor.execute('SELECT avatarUrl,nickName,mark FROM students\
-					UNION ALL\
-					SELECT avatarUrl,nickName,mark FROM others\
-					ORDER BY mark DESC\
-					LIMIT 10')
+                    UNION ALL\
+                    SELECT avatarUrl,nickName,mark FROM others\
+                    ORDER BY mark DESC\
+                    LIMIT 10')
     world = cursor.fetchall()
     redata['init']['lists'].append(world)
     redata['init']['lists'].append(school)
@@ -377,14 +377,14 @@ def questionget():
         return "请勿作弊"
     else:
         if did[0][0] == '0':
-            question_id = random.randrange(1, N[0][0]+1)
+            question_id = random.randrange(1, N[0][0] + 1)
         else:
             while 1:
-                question_id = random.randrange(1, N[0][0]+1)
+                question_id = random.randrange(1, N[0][0] + 1)
                 if (str(question_id) not in did[0][0]) and (str(question_id) not in abandoned):
                     break
         cursor.execute("SELECT title, opa, opb, opc, opd, opr FROM questions\
-				WHERE id = '%d'" % (question_id))
+                WHERE id = '%d'" % (question_id))
         question = cursor.fetchall()
         redata['title'] = question[0][0]
         temp = 0
@@ -404,22 +404,22 @@ def questionget():
             redata['op'].append(question[0][lst[i]])
         if flag == 0:
             sql = "UPDATE students\
-				   SET did = '%s',\
-					lastdid = '%d',\
-					lastjudge = 0,\
-					qfreq = '%d',\
-					oprtemp = '%d'\
-					WHERE openid = '%s'" % \
+                   SET did = '%s',\
+                    lastdid = '%d',\
+                    lastjudge = 0,\
+                    qfreq = '%d',\
+                    oprtemp = '%d'\
+                    WHERE openid = '%s'" % \
                 (did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1,
                              oprtemp, data['openID'])
         else:
             sql = "UPDATE others\
-				   SET did = '%s',\
-					lastdid = '%d',\
-					lastjudge = 0,\
-					qfreq = '%d',\
-					oprtemp = '%d'\
-					WHERE openid = '%s'" % \
+                   SET did = '%s',\
+                    lastdid = '%d',\
+                    lastjudge = 0,\
+                    qfreq = '%d',\
+                    oprtemp = '%d'\
+                    WHERE openid = '%s'" % \
                 (did[0][0] + ' ' + str(question_id), question_id, qfreq[0][0] + 1,
                              oprtemp, data['openID'])
         try:
@@ -481,10 +481,10 @@ def questionjudge():
                 add = 4
             if flag == 0:
                 sql = "UPDATE students\
-					   SET mark = '%d',\
-					   conti = '%d',\
-					   lastjudge = 1\
-					   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
+                       SET mark = '%d',\
+                       conti = '%d',\
+                       lastjudge = 1\
+                       WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
                 try:
                     cursor.execute(sql)
                     db.commit()
@@ -493,10 +493,10 @@ def questionjudge():
                     print("更新分数错误")
             else:
                 sql = "UPDATE others\
-					   SET mark = '%d',\
-					   conti = '%d',\
-					   lastjudge = 1\
-					   WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
+                       SET mark = '%d',\
+                       conti = '%d',\
+                       lastjudge = 1\
+                       WHERE openid = '%s'" % (temp[0][1] + add, temp[0][2] + 1, data['openID'])
                 try:
                     cursor.execute(sql)
                     db.commit()
@@ -507,8 +507,8 @@ def questionjudge():
             redata['judge'] = False
             if flag == 0:
                 sql = "UPDATE students\
-					   SET conti = 0\
-					   WHERE openid = '%s'" % (data['openID'])
+                       SET conti = 0\
+                       WHERE openid = '%s'" % (data['openID'])
                 try:
                     cursor.execute(sql)
                     db.commit()
@@ -517,8 +517,8 @@ def questionjudge():
                     print("更新conti错误")
             else:
                 sql = "UPDATE others\
-					   SET conti = 0\
-					   WHERE openid = '%s'" % (data['openID'])
+                       SET conti = 0\
+                       WHERE openid = '%s'" % (data['openID'])
                 try:
                     cursor.execute(sql)
                     db.commit()
@@ -549,8 +549,8 @@ def finish():
     redata['num'] = mark[0][0]
     if flag == 0:
         sql = "UPDATE students\
-			   SET conti = 0\
-			   WHERE openid = '%s'" % (data['openID'])
+               SET conti = 0\
+               WHERE openid = '%s'" % (data['openID'])
         try:
             cursor.execute(sql)
             db.commit()
@@ -559,8 +559,8 @@ def finish():
             print("更新conti错误")
     else:
         sql = "UPDATE others\
-			   SET conti = 0\
-			   WHERE openid = '%s'" % (data['openID'])
+               SET conti = 0\
+               WHERE openid = '%s'" % (data['openID'])
         try:
             cursor.execute(sql)
             db.commit()
@@ -581,8 +581,8 @@ def sharereward():
     redata['flag'] = 0
     if cursor.execute("SELECT conti FROM students WHERE openid = '%s'" % (data['openID'])) != 0:
         sql = "UPDATE students\
-			   SET conti = '%d'\
-			   WHERE openid = '%s'" % (1, data['openID'])
+               SET conti = '%d'\
+               WHERE openid = '%s'" % (1, data['openID'])
         try:
             cursor.execute(sql)
             db.commit()
@@ -592,8 +592,8 @@ def sharereward():
             print("更新conti错误")
     elif cursor.execute("SELECT conti FROM others WHERE openid = '%s'" % (data['openID'])) != 0:
         sql = "UPDATE others\
-			   SET conti = '%d'\
-			   WHERE openid = '%s'" % (1, data['openID'])
+               SET conti = '%d'\
+               WHERE openid = '%s'" % (1, data['openID'])
         try:
             cursor.execute(sql)
             db.commit()
@@ -602,13 +602,14 @@ def sharereward():
             cursor.rollback()
             print("更新conti错误")
     db.close()
-    return json.dumps(redata, ensure_ascii = False)
+    return json.dumps(redata, ensure_ascii=False)
 
 
 # show photo
 @app.route('/beijing', methods=['GET'])
 def beijing():
-    image_data = open(os.path.dirname(os.path.realpath(__file__)) + '/image/1.jpg', "rb").read()
+    image_data = open(os.path.dirname(os.path.realpath(
+        __file__)) + '/image/1.jpg', "rb").read()
     response = make_response(image_data)
     response.headers['Content-Type'] = 'image/jpg'
     return response
