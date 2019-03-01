@@ -605,7 +605,7 @@ def sharereward():
     return json.dumps(redata, ensure_ascii=False)
 
 
-# show photo
+# show photo 测试
 @app.route('/beijing', methods=['GET'])
 def beijing():
     image_data = open(os.path.dirname(os.path.realpath(
