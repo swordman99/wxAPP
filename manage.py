@@ -349,7 +349,7 @@ def questionget():
     db = pymysql.connect('127.0.0.1', 'root',
                          os.environ.get('MYSQL_PASSWORD'), 'demo')
     cursor = db.cursor()
-    abandoned = '492 525'
+    abandoned = '492 525 572 629'
     data = request.json
     redata = {}
     redata['title'] = ''
