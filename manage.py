@@ -372,9 +372,10 @@ def questionget():
             "SELECT qfreq FROM others WHERE openid = '%s'" % (data['openID']))
         qfreq = cursor.fetchall()
         flag = 1
-    if qfreq[0][0] > 50:
+    if qfreq[0][0] > 40:
         print('有人作弊')
-        return "请勿作弊"
+        redata['title'] = '请勿作弊'
+        return json.dumps(redata, ensure_ascii=False)
     else:
         if did[0][0] == '0':
             question_id = random.randrange(1, N[0][0] + 1)
