@@ -44,7 +44,6 @@ def openid():
         '&grant_type=authorization_code'
     r = requests.get(url)
     s1 = r.text
-    print(s1)
     s2 = s1.split('"')
     redata['openID'] = SHA1(to_bytes(SHA1(to_bytes(s2[7]))))
     db.close()
@@ -349,7 +348,7 @@ def questionget():
     db = pymysql.connect('127.0.0.1', 'root',
                          os.environ.get('MYSQL_PASSWORD'), 'demo')
     cursor = db.cursor()
-    abandoned = '492 525 572 629'
+    abandoned = ['492', '525', '572', '629']
     data = request.json
     redata = {}
     redata['title'] = ''
@@ -374,15 +373,20 @@ def questionget():
         qfreq = cursor.fetchall()
         flag = 1
     if qfreq[0][0] > 50:
+        print('有人作弊')
         return "请勿作弊"
     else:
         if did[0][0] == '0':
             question_id = random.randrange(1, N[0][0] + 1)
         else:
-            while 1:
-                question_id = random.randrange(1, N[0][0] + 1)
-                if (str(question_id) not in did[0][0]) and (str(question_id) not in abandoned):
+            question_id = random.randrange(1, N[0][0] + 1)
+            for i in range(1, N[0][0] + 1):
+                did_box=did[0][0].split()
+                if (str(question_id) in did_box) or (str(question_id) in abandoned):
+                    question_id = i
+                else:
                     break
+            print(question_id)
         cursor.execute("SELECT title, opa, opb, opc, opd, opr FROM questions\
                 WHERE id = '%d'" % (question_id))
         question = cursor.fetchall()

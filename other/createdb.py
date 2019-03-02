@@ -5,9 +5,9 @@ cursor = db.cursor()
 cursor.execute('DROP TABLE IF EXISTS students')
 sql1 = '''CREATE TABLE students(
           id int PRIMARY KEY AUTO_INCREMENT,
-          name varchar(25) NOT NULL,
-          stuid char(20) NOT NULL,
-          phone char(20) NOT NULL,
+          name varchar(25) NOT NULL DEFAULT '',
+          stuid char(20) NOT NULL '',
+          phone char(20) NOT NULL '',
           nickName varchar(60) NOT NULL,
           avatarUrl text NOT NULL,
           openid text NOT NULL,
