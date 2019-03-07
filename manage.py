@@ -381,13 +381,15 @@ def questionget():
             question_id = random.randrange(1, N[0][0] + 1)
         else:
             question_id = random.randrange(1, N[0][0] + 1)
-            for i in range(1, N[0][0] + 1):
-                did_box=did[0][0].split()
-                if (str(question_id) in did_box) or (str(question_id) in abandoned):
-                    question_id = i
-                else:
+            for i in range(1, N[0][0] + 2):
+                did_box = did[0][0].split()
+                if (str(question_id) not in did_box) and (str(question_id) not in abandoned):
                     break
-            print(question_id)
+                else:
+                    question_id = i
+            if question_id == N[0][0]+1:
+                redata['title'] = '您已刷穿题库！'
+                return json.dumps(redata, ensure_ascii=False)
         cursor.execute("SELECT title, opa, opb, opc, opd, opr FROM questions\
                 WHERE id = '%d'" % (question_id))
         question = cursor.fetchall()
