@@ -387,9 +387,9 @@ def questionget():
                     break
                 else:
                     question_id = i
-            if question_id == N[0][0]+1:
-                redata['title'] = '您已刷穿题库！'
-                return json.dumps(redata, ensure_ascii=False)
+                    if question_id == N[0][0]+1:
+                        redata['title'] = '您已刷穿题库！'
+                        return json.dumps(redata, ensure_ascii=False)
         cursor.execute("SELECT title, opa, opb, opc, opd, opr FROM questions\
                 WHERE id = '%d'" % (question_id))
         question = cursor.fetchall()
@@ -617,6 +617,15 @@ def sharereward():
 def beijing():
     image_data = open(os.path.dirname(os.path.realpath(
         __file__)) + '/image/1.jpg', "rb").read()
+    response = make_response(image_data)
+    response.headers['Content-Type'] = 'image/jpg'
+    return response
+
+
+@app.route('/beijing2', methods=['GET'])
+def beijing():
+    image_data = open(os.path.dirname(os.path.realpath(
+        __file__)) + '/image/2.jpg', "rb").read()
     response = make_response(image_data)
     response.headers['Content-Type'] = 'image/jpg'
     return response
