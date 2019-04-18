@@ -623,7 +623,7 @@ def beijing():
 
 
 @app.route('/beijing2', methods=['GET'])
-def beijing():
+def beijing2():
     image_data = open(os.path.dirname(os.path.realpath(
         __file__)) + '/image/2.jpg', "rb").read()
     response = make_response(image_data)
